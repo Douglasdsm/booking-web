@@ -171,8 +171,41 @@
         </div>
       }
       @case ('cliente') {
-        <h2>Dados do cliente</h2>
-        <p>Base pronta para criar usuario visitante e armazenar o token.</p>
+        <div class="customer-page">
+          <div>
+            <h2>Seus dados</h2>
+            <p>Informe os dados para identificar o agendamento.</p>
+          </div>
+
+          <form id="customer-form" class="customer-form" (submit)="$event.preventDefault(); submitCustomer()">
+            <label class="date-field">
+              <span>Nome</span>
+              <input
+                type="text"
+                autocomplete="name"
+                required
+                [value]="customerName()"
+                (input)="onCustomerNameInput($event)"
+              />
+            </label>
+
+            <label class="date-field">
+              <span>Telefone</span>
+              <input
+                type="tel"
+                autocomplete="tel"
+                inputmode="tel"
+                required
+                [value]="customerPhone()"
+                (input)="onCustomerPhoneInput($event)"
+              />
+            </label>
+
+            @if (store.error()) {
+              <div class="services-state services-state--error" role="alert">{{ store.error() }}</div>
+            }
+          </form>
+        </div>
       }
       @case ('confirmacao') {
         <h2>Confirmacao</h2>
@@ -241,6 +274,28 @@
         (click)="continueToCustomer()"
       >
         Continuar
+      </button>
+    </aside>
+  }
+
+  @if (store.currentStep() === 'cliente') {
+    <aside class="booking-summary" aria-label="Resumo dos dados do cliente">
+      <div>
+        <span>Cliente</span>
+        <strong>{{ customerName().trim() || 'Informe seus dados' }}</strong>
+      </div>
+
+      <button
+        type="submit"
+        form="customer-form"
+        class="booking-summary__button"
+        [disabled]="!isCustomerFormValid() || store.loading()"
+      >
+        @if (store.loading()) {
+          Salvando...
+        } @else {
+          Continuar
+        }
       </button>
     </aside>
   }

@@ -125,6 +125,7 @@ export interface BookingState {
   selectedDate: string | null;
   selectedSlot: BookingAvailableSlot | null;
   customer: BookingCustomer | null;
+  visitorAccessToken: string | null;
   createdBooking: CreateBookingResponse | null;
   loading: boolean;
   error: string | null;

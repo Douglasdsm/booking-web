@@ -197,6 +197,11 @@
   font-weight: 800;
 }
 
+.customer-form {
+  display: grid;
+  gap: 0.75rem;
+}
+
 .date-field input {
   min-height: 3rem;
   border: 1px solid #cbd5e1;

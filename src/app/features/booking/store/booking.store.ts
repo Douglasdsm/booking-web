@@ -23,6 +23,7 @@ const initialState: BookingState = {
   selectedDate: null,
   selectedSlot: null,
   customer: null,
+  visitorAccessToken: null,
   createdBooking: null,
   loading: false,
   error: null,
@@ -44,6 +45,7 @@ export class BookingStore {
   readonly selectedDate = computed(() => this.state().selectedDate);
   readonly selectedSlot = computed(() => this.state().selectedSlot);
   readonly customer = computed(() => this.state().customer);
+  readonly visitorAccessToken = computed(() => this.state().visitorAccessToken);
   readonly createdBooking = computed(() => this.state().createdBooking);
   readonly loading = computed(() => this.state().loading);
   readonly error = computed(() => this.state().error);
@@ -119,6 +121,10 @@ export class BookingStore {
 
   setCustomer(customer: BookingCustomer): void {
     this.patch({ customer });
+  }
+
+  setVisitorAccessToken(visitorAccessToken: string): void {
+    this.patch({ visitorAccessToken });
   }
 
   setCreatedBooking(createdBooking: CreateBookingResponse): void {

@@ -1,10 +1,11 @@
-import { Component, computed, DestroyRef, inject } from '@angular/core';
+import { Component, computed, DestroyRef, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { combineLatest, of } from 'rxjs';
 import { finalize, switchMap } from 'rxjs/operators';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
+import { VisitorTokenService } from '../../../../core/auth/visitor-token.service';
 import {
   BookingAvailableSlot,
   BookingProfessional,
@@ -43,6 +44,7 @@ export class BookingShellPage {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly api = inject(BookingApiService);
+  private readonly visitorToken = inject(VisitorTokenService);
   private readonly destroyRef = inject(DestroyRef);
 
   protected readonly store = inject(BookingStore);
@@ -52,6 +54,11 @@ export class BookingShellPage {
     this.steps.findIndex((step) => step === this.store.currentStep()),
   );
   protected readonly today = new Date().toISOString().slice(0, 10);
+  protected readonly customerName = signal(this.store.customer()?.nome ?? '');
+  protected readonly customerPhone = signal(this.store.customer()?.telefone ?? '');
+  protected readonly isCustomerFormValid = computed(
+    () => !!this.customerName().trim() && !!this.customerPhone().trim(),
+  );
 
   constructor() {
     const parentRoute = this.route.parent;
@@ -156,6 +163,48 @@ export class BookingShellPage {
     }
 
     void this.router.navigate(['../cliente'], { relativeTo: this.route });
+  }
+
+  protected onCustomerNameInput(event: Event): void {
+    this.customerName.set((event.target as HTMLInputElement).value);
+  }
+
+  protected onCustomerPhoneInput(event: Event): void {
+    this.customerPhone.set((event.target as HTMLInputElement).value);
+  }
+
+  protected submitCustomer(): void {
+    const nome = this.customerName().trim();
+    const telefone = this.customerPhone().trim();
+
+    if (!nome || !telefone || this.store.loading()) {
+      return;
+    }
+
+    this.store.setLoading(true);
+    this.store.setError(null);
+
+    this.api
+      .createVisitor({ nome, telefone })
+      .pipe(finalize(() => this.store.setLoading(false)))
+      .subscribe({
+        next: (response) => {
+          const accessToken = response.tokens?.accessToken;
+
+          if (!accessToken) {
+            this.store.setError('Nao foi possivel autenticar o visitante.');
+            return;
+          }
+
+          this.visitorToken.setToken(accessToken);
+          this.store.setVisitorAccessToken(accessToken);
+          this.store.setCustomer({ nome, telefone });
+          void this.router.navigate(['../confirmacao'], { relativeTo: this.route });
+        },
+        error: (error: HttpErrorResponse) => {
+          this.store.setError(error.message || 'Nao foi possivel salvar os dados do cliente.');
+        },
+      });
   }
 
   protected formatSlotTime(value: BookingAvailableSlot['horaInicio']): string {
