@@ -208,8 +208,64 @@
         </div>
       }
       @case ('confirmacao') {
-        <h2>Confirmacao</h2>
-        <p>Base pronta para revisar e enviar o agendamento.</p>
+        <div class="confirmation-page">
+          <div>
+            <h2>Confirme o agendamento</h2>
+            <p>Revise os dados antes de confirmar.</p>
+          </div>
+
+          <section class="confirmation-section">
+            <h3>Servicos</h3>
+            @for (service of store.selectedServices(); track service.servicoId) {
+              <div class="confirmation-row">
+                <span>{{ service.nome || 'Servico' }}</span>
+                <strong>{{ service.duracaoMinutos }} min | {{ formatCurrency(service.preco) }}</strong>
+              </div>
+            }
+          </section>
+
+          <section class="confirmation-section">
+            <h3>Atendimento</h3>
+            <div class="confirmation-row">
+              <span>Prestador</span>
+              <strong>{{ store.selectedProfessional()?.nome || 'Nao selecionado' }}</strong>
+            </div>
+            <div class="confirmation-row">
+              <span>Data</span>
+              <strong>{{ formatDate(store.selectedDate()) }}</strong>
+            </div>
+            <div class="confirmation-row">
+              <span>Horario</span>
+              <strong>
+                @if (store.selectedSlot()) {
+                  {{ formatSlotTime(store.selectedSlot()!.horaInicio) }}
+                } @else {
+                  Nao selecionado
+                }
+              </strong>
+            </div>
+            <div class="confirmation-row">
+              <span>Duracao total</span>
+              <strong>{{ store.totalDurationMinutes() }} min</strong>
+            </div>
+            <div class="confirmation-row">
+              <span>Valor total</span>
+              <strong>{{ formatCurrency(store.totalPrice()) }}</strong>
+            </div>
+          </section>
+
+          <section class="confirmation-section">
+            <h3>Cliente</h3>
+            <div class="confirmation-row">
+              <span>Nome</span>
+              <strong>{{ store.customer()?.nome || 'Nao informado' }}</strong>
+            </div>
+            <div class="confirmation-row">
+              <span>Telefone</span>
+              <strong>{{ store.customer()?.telefone || 'Nao informado' }}</strong>
+            </div>
+          </section>
+        </div>
       }
       @case ('sucesso') {
         <h2>Agendamento concluido</h2>
@@ -296,6 +352,19 @@
         } @else {
           Continuar
         }
+      </button>
+    </aside>
+  }
+
+  @if (store.currentStep() === 'confirmacao') {
+    <aside class="booking-summary" aria-label="Confirmar agendamento">
+      <div>
+        <span>Total</span>
+        <strong>{{ store.totalDurationMinutes() }} min | {{ formatCurrency(store.totalPrice()) }}</strong>
+      </div>
+
+      <button type="button" class="booking-summary__button" (click)="confirmBooking()">
+        Confirmar Agendamento
       </button>
     </aside>
   }

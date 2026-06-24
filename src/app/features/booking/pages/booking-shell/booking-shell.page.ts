@@ -207,6 +207,18 @@ export class BookingShellPage {
       });
   }
 
+  protected confirmBooking(): void {
+    return;
+  }
+
+  protected formatDate(value: string | null): string {
+    if (!value) {
+      return 'Nao selecionada';
+    }
+
+    return new Intl.DateTimeFormat('pt-BR', { timeZone: 'UTC' }).format(new Date(`${value}T00:00:00.000Z`));
+  }
+
   protected formatSlotTime(value: BookingAvailableSlot['horaInicio']): string {
     if (typeof value === 'string') {
       return value.slice(0, 5);
