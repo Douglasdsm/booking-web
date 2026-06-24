@@ -1,11 +1,11 @@
 import { Component, computed, DestroyRef, inject } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
-import { combineLatest } from 'rxjs';
+import { combineLatest, of } from 'rxjs';
 import { finalize, switchMap } from 'rxjs/operators';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
-import { BookingService, BookingStep } from '../../models/booking.models';
+import { BookingProfessional, BookingService, BookingStep } from '../../models/booking.models';
 import { BookingApiService } from '../../services/booking-api.service';
 import { BookingStore } from '../../store/booking.store';
 
@@ -58,8 +58,9 @@ export class BookingShellPage {
       .subscribe(([tenantParams, stepParams]) => {
         const slug = tenantParams.get('slug');
         const step = stepParams.get('etapa') as BookingStep | null;
+        const tenantChanged = !!slug && slug !== this.store.slug();
 
-        if (slug && slug !== this.store.slug()) {
+        if (tenantChanged) {
           this.store.setSlug(slug);
           this.store.clearServices();
           this.loadCompanyConfig(slug);
@@ -71,6 +72,10 @@ export class BookingShellPage {
         }
 
         this.store.setStep(step);
+
+        if (step === 'prestadores' && !tenantChanged) {
+          this.loadProfessionals();
+        }
       });
   }
 
@@ -96,6 +101,26 @@ export class BookingShellPage {
     void this.router.navigate(['../prestadores'], { relativeTo: this.route });
   }
 
+  protected isProfessionalSelected(professional: BookingProfessional): boolean {
+    return this.store.selectedProfessional()?.usuarioID === professional.usuarioID;
+  }
+
+  protected selectProfessional(professional: BookingProfessional): void {
+    this.store.selectProfessional(professional);
+  }
+
+  protected continueToSchedule(): void {
+    if (!this.store.selectedProfessional()) {
+      return;
+    }
+
+    void this.router.navigate(['../agenda'], { relativeTo: this.route });
+  }
+
+  protected professionalInitial(professional: BookingProfessional): string {
+    return professional.nome?.trim().charAt(0).toUpperCase() || 'P';
+  }
+
   protected formatCurrency(value: number): string {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
@@ -113,14 +138,55 @@ export class BookingShellPage {
         switchMap((company) => {
           this.store.setCompany(company);
 
-          return this.api.getServices(company.pessoaJuridicaID);
+          return this.api.getServices(company.pessoaJuridicaID).pipe(
+            switchMap((serviceResponse) => {
+              this.store.setServices(serviceResponse.servicos ?? []);
+
+              if (this.store.currentStep() !== 'prestadores') {
+                return of(null);
+              }
+
+              return this.api.getProfessionals({
+                pessoaJuridicaID: company.pessoaJuridicaID,
+                filialID: company.filialID,
+              });
+            }),
+          );
         }),
         finalize(() => this.store.setLoading(false)),
       )
       .subscribe({
-        next: (response) => this.store.setServices(response.servicos ?? []),
+        next: (response) => {
+          if (response) {
+            this.store.setProfessionals(response.prestadores ?? []);
+          }
+        },
         error: (error: HttpErrorResponse) => {
-          this.store.setError(error.message || 'Nao foi possivel carregar os servicos.');
+          this.store.setError(error.message || 'Nao foi possivel carregar os dados do agendamento.');
+        },
+      });
+  }
+
+  private loadProfessionals(): void {
+    const company = this.store.company();
+
+    if (!company || this.store.professionals().length) {
+      return;
+    }
+
+    this.store.setLoading(true);
+    this.store.setError(null);
+
+    this.api
+      .getProfessionals({
+        pessoaJuridicaID: company.pessoaJuridicaID,
+        filialID: company.filialID,
+      })
+      .pipe(finalize(() => this.store.setLoading(false)))
+      .subscribe({
+        next: (response) => this.store.setProfessionals(response.prestadores ?? []),
+        error: (error: HttpErrorResponse) => {
+          this.store.setError(error.message || 'Nao foi possivel carregar os prestadores.');
         },
       });
   }

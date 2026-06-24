@@ -77,8 +77,52 @@
         </div>
       }
       @case ('prestadores') {
-        <h2>Selecao de prestador</h2>
-        <p>Base pronta para listar prestadores da empresa/filial carregada pelo slug.</p>
+        <div class="professionals-page">
+          <div class="professionals-page__heading">
+            <h2>Escolha o prestador</h2>
+            <p>Selecione quem vai realizar o atendimento.</p>
+          </div>
+
+          @if (store.loading()) {
+            <div class="services-state" aria-live="polite">Carregando prestadores...</div>
+          } @else if (store.error()) {
+            <div class="services-state services-state--error" role="alert">{{ store.error() }}</div>
+          } @else if (!store.professionals().length) {
+            <div class="services-state">Nenhum prestador disponivel no momento.</div>
+          } @else {
+            <div class="professional-list" aria-label="Prestadores disponiveis">
+              @for (professional of store.professionals(); track professional.usuarioID) {
+                <button
+                  type="button"
+                  class="professional-card"
+                  [class.professional-card--selected]="isProfessionalSelected(professional)"
+                  (click)="selectProfessional(professional)"
+                  [attr.aria-pressed]="isProfessionalSelected(professional)"
+                >
+                  @if (professional.url) {
+                    <img
+                      class="professional-card__photo"
+                      [src]="professional.url"
+                      [alt]="professional.nome || 'Prestador'"
+                    />
+                  } @else {
+                    <span class="professional-card__photo professional-card__photo--fallback">
+                      {{ professionalInitial(professional) }}
+                    </span>
+                  }
+
+                  <span class="professional-card__content">
+                    <span class="professional-card__name">{{ professional.nome || 'Prestador' }}</span>
+
+                    @if (isProfessionalSelected(professional)) {
+                      <span class="professional-card__selected">Selecionado</span>
+                    }
+                  </span>
+                </button>
+              }
+            </div>
+          }
+        </div>
       }
       @case ('agenda') {
         <h2>Selecao de horario</h2>
@@ -111,6 +155,24 @@
         class="booking-summary__button"
         [disabled]="!store.selectedServices().length"
         (click)="continueToProfessionals()"
+      >
+        Continuar
+      </button>
+    </aside>
+  }
+
+  @if (store.currentStep() === 'prestadores') {
+    <aside class="booking-summary" aria-label="Resumo do prestador selecionado">
+      <div>
+        <span>Prestador</span>
+        <strong>{{ store.selectedProfessional()?.nome || 'Nenhum selecionado' }}</strong>
+      </div>
+
+      <button
+        type="button"
+        class="booking-summary__button"
+        [disabled]="!store.selectedProfessional()"
+        (click)="continueToSchedule()"
       >
         Continuar
       </button>
