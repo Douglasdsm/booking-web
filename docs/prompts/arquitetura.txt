@@ -1,0 +1,2 @@
+Analise toda documentação antes de implementar.
+Proponha arquitetura antes do código.

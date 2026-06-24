@@ -1,0 +1,1 @@
+Implemente apenas o fluxo público de agendamento.

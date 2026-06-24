@@ -1,0 +1,58 @@
+<main class="booking-shell">
+  <header class="booking-header">
+    <div>
+      <p class="booking-header__eyebrow">Agendamento online</p>
+      <h1>{{ store.company()?.nomeEmpresa || 'Escolha seu horario' }}</h1>
+    </div>
+
+    @if (store.company()?.logoUrl) {
+      <img [src]="store.company()?.logoUrl" [alt]="store.company()?.nomeEmpresa || 'Logo'" />
+    }
+  </header>
+
+  <nav class="booking-steps" aria-label="Etapas do agendamento">
+    @for (step of steps; track step; let index = $index) {
+      <a
+        [routerLink]="stepLink(step)"
+        [class.booking-steps__item--active]="step === store.currentStep()"
+        class="booking-steps__item"
+      >
+        <span>{{ index + 1 }}</span>
+        {{ labels[step] }}
+      </a>
+    }
+  </nav>
+
+  <section class="booking-content">
+    <p class="booking-content__counter">
+      Etapa {{ currentStepIndex() + 1 }} de {{ steps.length }}
+    </p>
+
+    @switch (store.currentStep()) {
+      @case ('servicos') {
+        <h2>Selecao de servicos</h2>
+        <p>Base pronta para listar servicos do tenant e calcular a duracao total.</p>
+      }
+      @case ('prestadores') {
+        <h2>Selecao de prestador</h2>
+        <p>Base pronta para listar prestadores da empresa/filial carregada pelo slug.</p>
+      }
+      @case ('agenda') {
+        <h2>Selecao de horario</h2>
+        <p>Base pronta para consultar horarios com a soma da duracao dos servicos.</p>
+      }
+      @case ('cliente') {
+        <h2>Dados do cliente</h2>
+        <p>Base pronta para criar usuario visitante e armazenar o token.</p>
+      }
+      @case ('confirmacao') {
+        <h2>Confirmacao</h2>
+        <p>Base pronta para revisar e enviar o agendamento.</p>
+      }
+      @case ('sucesso') {
+        <h2>Agendamento concluido</h2>
+        <p>Base pronta para apresentar o protocolo do agendamento.</p>
+      }
+    }
+  </section>
+</main>
