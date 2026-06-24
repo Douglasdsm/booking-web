@@ -72,6 +72,17 @@ export class BookingStore {
     this.patch({ services });
   }
 
+  clearServices(): void {
+    this.patch({
+      services: [],
+      selectedServices: [],
+      selectedProfessional: null,
+      selectedDate: null,
+      selectedSlot: null,
+      availableSlots: [],
+    });
+  }
+
   setProfessionals(professionals: BookingProfessional[]): void {
     this.patch({ professionals });
   }

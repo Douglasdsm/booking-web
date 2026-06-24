@@ -2,10 +2,10 @@ import { Component, computed, DestroyRef, inject } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { combineLatest } from 'rxjs';
-import { finalize } from 'rxjs/operators';
+import { finalize, switchMap } from 'rxjs/operators';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
-import { BookingStep } from '../../models/booking.models';
+import { BookingService, BookingStep } from '../../models/booking.models';
 import { BookingApiService } from '../../services/booking-api.service';
 import { BookingStore } from '../../store/booking.store';
 
@@ -61,6 +61,7 @@ export class BookingShellPage {
 
         if (slug && slug !== this.store.slug()) {
           this.store.setSlug(slug);
+          this.store.clearServices();
           this.loadCompanyConfig(slug);
         }
 
@@ -77,17 +78,49 @@ export class BookingShellPage {
     return ['../', step];
   }
 
+  protected isServiceSelected(service: BookingService): boolean {
+    return this.store
+      .selectedServices()
+      .some((selectedService) => selectedService.servicoId === service.servicoId);
+  }
+
+  protected toggleService(service: BookingService): void {
+    this.store.toggleService(service);
+  }
+
+  protected continueToProfessionals(): void {
+    if (!this.store.selectedServices().length) {
+      return;
+    }
+
+    void this.router.navigate(['../prestadores'], { relativeTo: this.route });
+  }
+
+  protected formatCurrency(value: number): string {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+    }).format(value);
+  }
+
   private loadCompanyConfig(slug: string): void {
     this.store.setLoading(true);
     this.store.setError(null);
 
     this.api
       .getConfig(slug)
-      .pipe(finalize(() => this.store.setLoading(false)))
+      .pipe(
+        switchMap((company) => {
+          this.store.setCompany(company);
+
+          return this.api.getServices(company.pessoaJuridicaID);
+        }),
+        finalize(() => this.store.setLoading(false)),
+      )
       .subscribe({
-        next: (company) => this.store.setCompany(company),
+        next: (response) => this.store.setServices(response.servicos ?? []),
         error: (error: HttpErrorResponse) => {
-          this.store.setError(error.message || 'Nao foi possivel carregar a empresa.');
+          this.store.setError(error.message || 'Nao foi possivel carregar os servicos.');
         },
       });
   }

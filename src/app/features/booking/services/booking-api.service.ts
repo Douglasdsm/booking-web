@@ -24,8 +24,10 @@ export class BookingApiService {
     return this.http.get<BookingCompanyConfig>(this.url(this.config.endpoints.bookingConfig(slug)));
   }
 
-  getServices() {
-    return this.http.get<ServiceListResponse>(this.url(this.config.endpoints.services));
+  getServices(pessoaJuridicaID: number) {
+    return this.http.get<ServiceListResponse>(this.url(this.config.endpoints.services), {
+      params: { PessoaJuridicaID: pessoaJuridicaID },
+    });
   }
 
   getProfessionals(request: GetProfessionalsRequest) {

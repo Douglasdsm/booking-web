@@ -30,8 +30,51 @@
 
     @switch (store.currentStep()) {
       @case ('servicos') {
-        <h2>Selecao de servicos</h2>
-        <p>Base pronta para listar servicos do tenant e calcular a duracao total.</p>
+        <div class="services-page">
+          <div class="services-page__heading">
+            <h2>Escolha os servicos</h2>
+            <p>Selecione um ou mais servicos para calcular o tempo e o valor do agendamento.</p>
+          </div>
+
+          @if (store.loading()) {
+            <div class="services-state" aria-live="polite">Carregando servicos...</div>
+          } @else if (store.error()) {
+            <div class="services-state services-state--error" role="alert">{{ store.error() }}</div>
+          } @else if (!store.services().length) {
+            <div class="services-state">Nenhum servico disponivel no momento.</div>
+          } @else {
+            <div class="service-list" aria-label="Servicos disponiveis">
+              @for (service of store.services(); track service.servicoId) {
+                <button
+                  type="button"
+                  class="service-card"
+                  [class.service-card--selected]="isServiceSelected(service)"
+                  (click)="toggleService(service)"
+                  [attr.aria-pressed]="isServiceSelected(service)"
+                >
+                  <span class="service-card__check" aria-hidden="true">
+                    @if (isServiceSelected(service)) {
+                      OK
+                    }
+                  </span>
+
+                  <span class="service-card__content">
+                    <span class="service-card__title">{{ service.nome || 'Servico' }}</span>
+
+                    @if (service.descricao) {
+                      <span class="service-card__description">{{ service.descricao }}</span>
+                    }
+
+                    <span class="service-card__meta">
+                      <strong>{{ service.duracaoMinutos }} min</strong>
+                      <strong>{{ formatCurrency(service.preco) }}</strong>
+                    </span>
+                  </span>
+                </button>
+              }
+            </div>
+          }
+        </div>
       }
       @case ('prestadores') {
         <h2>Selecao de prestador</h2>
@@ -55,4 +98,22 @@
       }
     }
   </section>
+
+  @if (store.currentStep() === 'servicos') {
+    <aside class="booking-summary" aria-label="Resumo dos servicos selecionados">
+      <div>
+        <span>{{ store.selectedServices().length }} selecionado(s)</span>
+        <strong>{{ store.totalDurationMinutes() }} min | {{ formatCurrency(store.totalPrice()) }}</strong>
+      </div>
+
+      <button
+        type="button"
+        class="booking-summary__button"
+        [disabled]="!store.selectedServices().length"
+        (click)="continueToProfessionals()"
+      >
+        Continuar
+      </button>
+    </aside>
+  }
 </main>
