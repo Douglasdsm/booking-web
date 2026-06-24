@@ -97,18 +97,6 @@
   font-size: 1.25rem;
 }
 
-.booking-content p {
-  margin: 0;
-  color: #475569;
-}
-
-.services-page,
-.professionals-page {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
 .service-list,
 .professional-list {
   display: grid;
@@ -191,18 +179,9 @@
   font-weight: 800;
 }
 
-.professional-card__content {
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-  gap: 0.35rem;
-}
-
 .professional-card__name {
   overflow-wrap: anywhere;
-  font-size: 1rem;
   font-weight: 800;
-  line-height: 1.25;
 }
 
 .service-card__content {
@@ -212,16 +191,41 @@
   gap: 0.35rem;
 }
 
-.service-card__title {
-  font-size: 1rem;
+.date-field {
+  display: grid;
+  gap: 0.35rem;
   font-weight: 800;
-  line-height: 1.25;
 }
 
-.service-card__meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem 0.75rem;
+.date-field input {
+  min-height: 3rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.5rem;
+  color: #111827;
+  font: inherit;
+  padding: 0 0.875rem;
+}
+
+.slot-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.slot-button {
+  min-height: 3rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+  background: #ffffff;
+  color: #111827;
+  cursor: pointer;
+  font-weight: 800;
+}
+
+.slot-button--selected {
+  border-color: #111827;
+  background: #111827;
+  color: #ffffff;
 }
 
 .services-state {
@@ -251,18 +255,6 @@
   background: #ffffff;
   box-shadow: 0 -0.75rem 2rem rgb(15 23 42 / 10%);
   padding: 0.875rem 1rem;
-}
-
-.booking-summary div {
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-  gap: 0.15rem;
-}
-
-.booking-summary strong {
-  color: #111827;
-  font-size: 1rem;
 }
 
 .booking-summary__button {

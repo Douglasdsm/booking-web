@@ -5,7 +5,13 @@ import { combineLatest, of } from 'rxjs';
 import { finalize, switchMap } from 'rxjs/operators';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
-import { BookingProfessional, BookingService, BookingStep } from '../../models/booking.models';
+import {
+  BookingAvailableSlot,
+  BookingProfessional,
+  BookingService,
+  BookingStep,
+  TimeSpan,
+} from '../../models/booking.models';
 import { BookingApiService } from '../../services/booking-api.service';
 import { BookingStore } from '../../store/booking.store';
 
@@ -45,6 +51,7 @@ export class BookingShellPage {
   protected readonly currentStepIndex = computed(() =>
     this.steps.findIndex((step) => step === this.store.currentStep()),
   );
+  protected readonly today = new Date().toISOString().slice(0, 10);
 
   constructor() {
     const parentRoute = this.route.parent;
@@ -121,6 +128,53 @@ export class BookingShellPage {
     return professional.nome?.trim().charAt(0).toUpperCase() || 'P';
   }
 
+  protected onDateChange(event: Event): void {
+    const date = (event.target as HTMLInputElement).value;
+    this.store.selectDate(date);
+
+    if (!date) {
+      this.store.setAvailableSlots([]);
+      return;
+    }
+
+    this.loadAvailableSlots(date);
+  }
+
+  protected isSlotSelected(slot: BookingAvailableSlot): boolean {
+    const selectedSlot = this.store.selectedSlot();
+
+    return !!selectedSlot && this.slotKey(selectedSlot) === this.slotKey(slot);
+  }
+
+  protected selectSlot(slot: BookingAvailableSlot): void {
+    this.store.selectSlot(slot);
+  }
+
+  protected continueToCustomer(): void {
+    if (!this.store.selectedSlot()) {
+      return;
+    }
+
+    void this.router.navigate(['../cliente'], { relativeTo: this.route });
+  }
+
+  protected formatSlotTime(value: BookingAvailableSlot['horaInicio']): string {
+    if (typeof value === 'string') {
+      return value.slice(0, 5);
+    }
+
+    const totalMinutes =
+      value.totalMinutes !== undefined
+        ? Math.trunc(value.totalMinutes)
+        : (value.hours ?? 0) * 60 + (value.minutes ?? 0);
+    const hours = Math.trunc(totalMinutes / 60)
+      .toString()
+      .padStart(2, '0');
+    const minutes = (totalMinutes % 60).toString().padStart(2, '0');
+
+    return `${hours}:${minutes}`;
+  }
+
   protected formatCurrency(value: number): string {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
@@ -189,5 +243,40 @@ export class BookingShellPage {
           this.store.setError(error.message || 'Nao foi possivel carregar os prestadores.');
         },
       });
+  }
+
+  private loadAvailableSlots(date: string): void {
+    const professional = this.store.selectedProfessional();
+    const duration = this.store.totalDurationMinutes();
+
+    if (!professional || !duration) {
+      this.store.setAvailableSlots([]);
+      return;
+    }
+
+    this.store.setLoading(true);
+    this.store.setError(null);
+
+    this.api
+      .getAvailableSlots({
+        prestadorId: professional.usuarioID,
+        data: `${date}T00:00:00.000Z`,
+        duracaoMinutos: duration,
+      })
+      .pipe(finalize(() => this.store.setLoading(false)))
+      .subscribe({
+        next: (slots) => this.store.setAvailableSlots(slots),
+        error: (error: HttpErrorResponse) => {
+          this.store.setError(error.message || 'Nao foi possivel carregar os horarios.');
+        },
+      });
+  }
+
+  protected slotKey(slot: BookingAvailableSlot): string {
+    return `${this.timeKey(slot.horaInicio)}-${this.timeKey(slot.horaFim)}`;
+  }
+
+  private timeKey(value: TimeSpan | string): string {
+    return typeof value === 'string' ? value : `${value.ticks}-${value.hours}-${value.minutes}`;
   }
 }

@@ -125,8 +125,50 @@
         </div>
       }
       @case ('agenda') {
-        <h2>Selecao de horario</h2>
-        <p>Base pronta para consultar horarios com a soma da duracao dos servicos.</p>
+        <div class="agenda-page">
+          <div>
+            <h2>Escolha o horario</h2>
+            <p>{{ store.selectedProfessional()?.nome || 'Prestador' }} | {{ store.totalDurationMinutes() }} min</p>
+          </div>
+
+          @if (!store.selectedProfessional() || !store.totalDurationMinutes()) {
+            <div class="services-state">Selecione servicos e prestador antes de escolher o horario.</div>
+          } @else {
+            <label class="date-field">
+              <span>Data</span>
+              <input
+                type="date"
+                [min]="today"
+                [value]="store.selectedDate() || ''"
+                (change)="onDateChange($event)"
+              />
+            </label>
+
+            @if (store.loading()) {
+              <div class="services-state" aria-live="polite">Carregando horarios...</div>
+            } @else if (store.error()) {
+              <div class="services-state services-state--error" role="alert">{{ store.error() }}</div>
+            } @else if (!store.selectedDate()) {
+              <div class="services-state">Escolha uma data para ver os horarios disponiveis.</div>
+            } @else if (!store.availableSlots().length) {
+              <div class="services-state">Nenhum horario disponivel para esta data.</div>
+            } @else {
+              <div class="slot-grid" aria-label="Horarios disponiveis">
+                @for (slot of store.availableSlots(); track slotKey(slot)) {
+                  <button
+                    type="button"
+                    class="slot-button"
+                    [class.slot-button--selected]="isSlotSelected(slot)"
+                    (click)="selectSlot(slot)"
+                    [attr.aria-pressed]="isSlotSelected(slot)"
+                  >
+                    {{ formatSlotTime(slot.horaInicio) }}
+                  </button>
+                }
+              </div>
+            }
+          }
+        </div>
       }
       @case ('cliente') {
         <h2>Dados do cliente</h2>
@@ -173,6 +215,30 @@
         class="booking-summary__button"
         [disabled]="!store.selectedProfessional()"
         (click)="continueToSchedule()"
+      >
+        Continuar
+      </button>
+    </aside>
+  }
+
+  @if (store.currentStep() === 'agenda') {
+    <aside class="booking-summary" aria-label="Resumo do horario selecionado">
+      <div>
+        <span>Horario</span>
+        <strong>
+          @if (store.selectedSlot()) {
+            {{ formatSlotTime(store.selectedSlot()!.horaInicio) }}
+          } @else {
+            Nenhum selecionado
+          }
+        </strong>
+      </div>
+
+      <button
+        type="button"
+        class="booking-summary__button"
+        [disabled]="!store.selectedSlot()"
+        (click)="continueToCustomer()"
       >
         Continuar
       </button>

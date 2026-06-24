@@ -52,8 +52,8 @@ export interface TimeSpan {
 }
 
 export interface BookingAvailableSlot {
-  horaInicio: TimeSpan;
-  horaFim: TimeSpan;
+  horaInicio: TimeSpan | string;
+  horaFim: TimeSpan | string;
 }
 
 export interface BookingCustomer {
