@@ -284,6 +284,10 @@
               <strong class="text-right">{{ store.customer()?.telefone || 'Nao informado' }}</strong>
             </div>
           </section>
+
+          @if (store.error()) {
+            <div class="services-state services-state--error" role="alert">{{ store.error() }}</div>
+          }
         </div>
       }
       @case ('sucesso') {
@@ -385,10 +389,14 @@
       <button
         type="button"
         class="booking-summary__button"
-        [disabled]="!canConfirmBooking()"
+        [disabled]="!canConfirmBooking() || store.loading()"
         (click)="confirmBooking()"
       >
-        Confirmar Agendamento
+        @if (store.loading()) {
+          Confirmando...
+        } @else {
+          Confirmar Agendamento
+        }
       </button>
     </aside>
   }

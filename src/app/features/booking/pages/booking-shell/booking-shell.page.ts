@@ -11,6 +11,7 @@ import {
   BookingProfessional,
   BookingService,
   BookingStep,
+  CreateBookingRequest,
   TimeSpan,
 } from '../../models/booking.models';
 import { BookingApiService } from '../../services/booking-api.service';
@@ -221,7 +222,28 @@ export class BookingShellPage {
       return;
     }
 
-    void this.router.navigate(['../sucesso'], { relativeTo: this.route });
+    const payload = this.buildBookingPayload();
+
+    if (!payload) {
+      this.store.setError('Revise os dados do agendamento antes de confirmar.');
+      return;
+    }
+
+    this.store.setLoading(true);
+    this.store.setError(null);
+
+    this.api
+      .createBooking(payload)
+      .pipe(finalize(() => this.store.setLoading(false)))
+      .subscribe({
+        next: (response) => {
+          this.store.setCreatedBooking(response);
+          void this.router.navigate(['../sucesso'], { relativeTo: this.route });
+        },
+        error: () => {
+          this.store.setError('Nao foi possivel confirmar o agendamento. Tente novamente.');
+        },
+      });
   }
 
   protected formatDate(value: string | null): string {
@@ -247,6 +269,24 @@ export class BookingShellPage {
     const minutes = (totalMinutes % 60).toString().padStart(2, '0');
 
     return `${hours}:${minutes}`;
+  }
+
+  protected formatSlotTimeWithSeconds(value: BookingAvailableSlot['horaInicio']): string {
+    if (typeof value === 'string') {
+      return value.length === 5 ? `${value}:00` : value.slice(0, 8);
+    }
+
+    const totalMinutes =
+      value.totalMinutes !== undefined
+        ? Math.trunc(value.totalMinutes)
+        : (value.hours ?? 0) * 60 + (value.minutes ?? 0);
+    const hours = Math.trunc(totalMinutes / 60)
+      .toString()
+      .padStart(2, '0');
+    const minutes = (totalMinutes % 60).toString().padStart(2, '0');
+    const seconds = (value.seconds ?? 0).toString().padStart(2, '0');
+
+    return `${hours}:${minutes}:${seconds}`;
   }
 
   protected formatCurrency(value: number): string {
@@ -344,6 +384,41 @@ export class BookingShellPage {
           this.store.setError(error.message || 'Nao foi possivel carregar os horarios.');
         },
       });
+  }
+
+  private buildBookingPayload(): CreateBookingRequest | null {
+    const company = this.store.company();
+    const professional = this.store.selectedProfessional();
+    const selectedDate = this.store.selectedDate();
+    const selectedSlot = this.store.selectedSlot();
+    const selectedServices = this.store.selectedServices();
+
+    if (!company || !professional || !selectedDate || !selectedSlot || !selectedServices.length) {
+      return null;
+    }
+
+    return {
+      isCliente: false,
+      dataHoraAgendamento: `${selectedDate}T${this.formatSlotTimeWithSeconds(selectedSlot.horaInicio)}`,
+      duracaoMinutos: this.store.totalDurationMinutes(),
+      usuarioID: 0,
+      pessoaJuridicaID: company.pessoaJuridicaID,
+      filialID: company.filialID,
+      prestadorID: professional.usuarioID,
+      ordemServico: {
+        valorTotal: this.store.totalPrice(),
+        descontoTotal: 0,
+        usuarioID: 0,
+        pessoaJuridicaID: company.pessoaJuridicaID,
+        filialID: company.filialID,
+        itens: selectedServices.map((service) => ({
+          valor: service.preco,
+          desconto: 0,
+          servicoID: service.servicoId,
+          tabelaPrecosID: service.tabelaPrecosID,
+        })),
+      },
+    };
   }
 
   protected slotKey(slot: BookingAvailableSlot): string {
