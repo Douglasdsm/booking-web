@@ -291,8 +291,66 @@
         </div>
       }
       @case ('sucesso') {
-        <h2>Agendamento concluido</h2>
-        <p>Base pronta para apresentar o protocolo do agendamento.</p>
+        <div class="grid gap-4">
+          <section class="grid gap-2 rounded-lg border border-green-200 bg-green-50 p-4 text-center">
+            <h2 class="m-0 text-xl font-bold text-green-900">Agendamento confirmado</h2>
+            <p class="m-0 text-sm text-green-800">Seu horario foi reservado com sucesso.</p>
+
+            @if (store.createdBooking()) {
+              <p class="m-0 text-sm font-bold text-green-900">
+                Protocolo #{{ store.createdBooking()?.id }}
+              </p>
+            }
+          </section>
+
+          <section class="grid gap-3 rounded-lg border border-slate-200 p-4">
+            <h3 class="m-0 text-base font-bold">Resumo</h3>
+
+            <div class="grid gap-2">
+              <span class="text-sm font-bold text-slate-600">Servicos</span>
+              @for (service of store.selectedServices(); track service.servicoId) {
+                <div class="flex justify-between gap-3 text-sm">
+                  <span class="text-slate-700">{{ service.nome || 'Servico' }}</span>
+                  <strong class="text-right">{{ formatCurrency(service.preco) }}</strong>
+                </div>
+              }
+            </div>
+
+            <div class="flex justify-between gap-3 text-sm">
+              <span class="text-slate-600">Prestador</span>
+              <strong class="text-right">{{ store.selectedProfessional()?.nome || 'Nao informado' }}</strong>
+            </div>
+
+            <div class="flex justify-between gap-3 text-sm">
+              <span class="text-slate-600">Data</span>
+              <strong class="text-right">{{ formatDate(store.selectedDate()) }}</strong>
+            </div>
+
+            <div class="flex justify-between gap-3 text-sm">
+              <span class="text-slate-600">Horario</span>
+              <strong class="text-right">
+                @if (store.selectedSlot()) {
+                  {{ formatSlotTime(store.selectedSlot()!.horaInicio) }}
+                } @else {
+                  Nao informado
+                }
+              </strong>
+            </div>
+
+            <div class="flex justify-between gap-3 border-t border-slate-200 pt-3 text-sm">
+              <span class="font-bold text-slate-700">Valor total</span>
+              <strong class="text-right">{{ formatCurrency(store.totalPrice()) }}</strong>
+            </div>
+          </section>
+
+          <button
+            type="button"
+            class="min-h-12 rounded-lg bg-slate-950 px-4 font-bold text-white"
+            (click)="startNewBooking()"
+          >
+            Novo agendamento
+          </button>
+        </div>
       }
     }
   </section>

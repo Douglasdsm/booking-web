@@ -246,6 +246,16 @@ export class BookingShellPage {
       });
   }
 
+  protected startNewBooking(): void {
+    const slug = this.store.slug() ?? this.route.parent?.snapshot.paramMap.get('slug') ?? '';
+
+    this.store.reset();
+    this.customerName.set('');
+    this.customerPhone.set('');
+
+    void this.router.navigate(['/agendar', slug, 'servicos']);
+  }
+
   protected formatDate(value: string | null): string {
     if (!value) {
       return 'Nao selecionada';
