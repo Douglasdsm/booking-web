@@ -208,35 +208,60 @@
         </div>
       }
       @case ('confirmacao') {
-        <div class="confirmation-page">
-          <div>
+        <div class="grid gap-4">
+          <div class="grid gap-1">
             <h2>Confirme o agendamento</h2>
-            <p>Revise os dados antes de confirmar.</p>
+            <p class="text-sm text-slate-600">Revise os dados antes de concluir.</p>
           </div>
 
-          <section class="confirmation-section">
-            <h3>Servicos</h3>
-            @for (service of store.selectedServices(); track service.servicoId) {
-              <div class="confirmation-row">
-                <span>{{ service.nome || 'Servico' }}</span>
-                <strong>{{ service.duracaoMinutos }} min | {{ formatCurrency(service.preco) }}</strong>
-              </div>
-            }
+          <section class="grid gap-3 rounded-lg border border-slate-200 p-4">
+            <div class="flex items-center justify-between gap-3">
+              <h3 class="m-0 text-base font-bold">Servicos</h3>
+              <span class="rounded-full bg-slate-100 px-3 py-1 text-sm font-bold text-slate-700">
+                {{ store.selectedServices().length }} selecionado(s)
+              </span>
+            </div>
+
+            <div class="grid gap-2">
+              @for (service of store.selectedServices(); track service.servicoId) {
+                <div class="flex justify-between gap-3 text-sm">
+                  <span class="text-slate-700">{{ service.nome || 'Servico' }}</span>
+                  <strong class="text-right">{{ service.duracaoMinutos }} min | {{ formatCurrency(service.preco) }}</strong>
+                </div>
+              }
+            </div>
           </section>
 
-          <section class="confirmation-section">
-            <h3>Atendimento</h3>
-            <div class="confirmation-row">
-              <span>Prestador</span>
-              <strong>{{ store.selectedProfessional()?.nome || 'Nao selecionado' }}</strong>
+          <section class="grid gap-3 rounded-lg border border-slate-200 p-4">
+            <h3 class="m-0 text-base font-bold">Resumo</h3>
+
+            <div class="flex justify-between gap-3 text-sm">
+              <span class="text-slate-600">Valor total</span>
+              <strong class="text-right">{{ formatCurrency(store.totalPrice()) }}</strong>
             </div>
-            <div class="confirmation-row">
-              <span>Data</span>
-              <strong>{{ formatDate(store.selectedDate()) }}</strong>
+
+            <div class="flex justify-between gap-3 text-sm">
+              <span class="text-slate-600">Duracao total</span>
+              <strong class="text-right">{{ store.totalDurationMinutes() }} min</strong>
             </div>
-            <div class="confirmation-row">
-              <span>Horario</span>
-              <strong>
+          </section>
+
+          <section class="grid gap-3 rounded-lg border border-slate-200 p-4">
+            <h3 class="m-0 text-base font-bold">Atendimento</h3>
+
+            <div class="flex justify-between gap-3 text-sm">
+              <span class="text-slate-600">Prestador</span>
+              <strong class="text-right">{{ store.selectedProfessional()?.nome || 'Nao selecionado' }}</strong>
+            </div>
+
+            <div class="flex justify-between gap-3 text-sm">
+              <span class="text-slate-600">Data</span>
+              <strong class="text-right">{{ formatDate(store.selectedDate()) }}</strong>
+            </div>
+
+            <div class="flex justify-between gap-3 text-sm">
+              <span class="text-slate-600">Horario</span>
+              <strong class="text-right">
                 @if (store.selectedSlot()) {
                   {{ formatSlotTime(store.selectedSlot()!.horaInicio) }}
                 } @else {
@@ -244,25 +269,19 @@
                 }
               </strong>
             </div>
-            <div class="confirmation-row">
-              <span>Duracao total</span>
-              <strong>{{ store.totalDurationMinutes() }} min</strong>
-            </div>
-            <div class="confirmation-row">
-              <span>Valor total</span>
-              <strong>{{ formatCurrency(store.totalPrice()) }}</strong>
-            </div>
           </section>
 
-          <section class="confirmation-section">
-            <h3>Cliente</h3>
-            <div class="confirmation-row">
-              <span>Nome</span>
-              <strong>{{ store.customer()?.nome || 'Nao informado' }}</strong>
+          <section class="grid gap-3 rounded-lg border border-slate-200 p-4">
+            <h3 class="m-0 text-base font-bold">Cliente</h3>
+
+            <div class="flex justify-between gap-3 text-sm">
+              <span class="text-slate-600">Nome</span>
+              <strong class="text-right">{{ store.customer()?.nome || 'Nao informado' }}</strong>
             </div>
-            <div class="confirmation-row">
-              <span>Telefone</span>
-              <strong>{{ store.customer()?.telefone || 'Nao informado' }}</strong>
+
+            <div class="flex justify-between gap-3 text-sm">
+              <span class="text-slate-600">Telefone</span>
+              <strong class="text-right">{{ store.customer()?.telefone || 'Nao informado' }}</strong>
             </div>
           </section>
         </div>
@@ -363,7 +382,12 @@
         <strong>{{ store.totalDurationMinutes() }} min | {{ formatCurrency(store.totalPrice()) }}</strong>
       </div>
 
-      <button type="button" class="booking-summary__button" (click)="confirmBooking()">
+      <button
+        type="button"
+        class="booking-summary__button"
+        [disabled]="!canConfirmBooking()"
+        (click)="confirmBooking()"
+      >
         Confirmar Agendamento
       </button>
     </aside>

@@ -59,6 +59,15 @@ export class BookingShellPage {
   protected readonly isCustomerFormValid = computed(
     () => !!this.customerName().trim() && !!this.customerPhone().trim(),
   );
+  protected readonly canConfirmBooking = computed(
+    () =>
+      !!this.store.selectedServices().length &&
+      !!this.store.selectedProfessional() &&
+      !!this.store.selectedDate() &&
+      !!this.store.selectedSlot() &&
+      !!this.store.customer()?.nome &&
+      !!this.store.customer()?.telefone,
+  );
 
   constructor() {
     const parentRoute = this.route.parent;
@@ -208,7 +217,11 @@ export class BookingShellPage {
   }
 
   protected confirmBooking(): void {
-    return;
+    if (!this.canConfirmBooking()) {
+      return;
+    }
+
+    void this.router.navigate(['../sucesso'], { relativeTo: this.route });
   }
 
   protected formatDate(value: string | null): string {
