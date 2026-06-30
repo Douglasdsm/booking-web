@@ -18,10 +18,10 @@ import { BookingApiService } from '../../services/booking-api.service';
 import { BookingStore } from '../../store/booking.store';
 
 const bookingSteps: BookingStep[] = [
+  'cliente',
   'servicos',
   'prestadores',
   'agenda',
-  'cliente',
   'confirmacao',
   'sucesso',
 ];
@@ -87,15 +87,31 @@ export class BookingShellPage {
         if (tenantChanged) {
           this.store.setSlug(slug);
           this.store.clearServices();
-          this.loadCompanyConfig(slug);
+          this.store.setVisitorAccessToken(null);
+          this.visitorToken.setToken(null);
         }
 
         if (!step || !this.steps.includes(step)) {
-          void this.router.navigate(['../servicos'], { relativeTo: this.route });
+          void this.router.navigate(['../cliente'], { relativeTo: this.route });
           return;
         }
 
         this.store.setStep(step);
+
+        if (step !== 'cliente' && !this.visitorToken.token()) {
+          void this.router.navigate(['../cliente'], { relativeTo: this.route });
+          return;
+        }
+
+        if (slug && step === 'servicos' && (!this.store.company() || !this.store.services().length)) {
+          this.loadCompanyConfig(slug);
+          return;
+        }
+
+        if (slug && step === 'prestadores' && !this.store.company()) {
+          this.loadCompanyConfig(slug);
+          return;
+        }
 
         if (step === 'prestadores' && !tenantChanged) {
           this.loadProfessionals();
@@ -172,7 +188,7 @@ export class BookingShellPage {
       return;
     }
 
-    void this.router.navigate(['../cliente'], { relativeTo: this.route });
+    void this.router.navigate(['../confirmacao'], { relativeTo: this.route });
   }
 
   protected onCustomerNameInput(event: Event): void {
@@ -209,7 +225,7 @@ export class BookingShellPage {
           this.visitorToken.setToken(accessToken);
           this.store.setVisitorAccessToken(accessToken);
           this.store.setCustomer({ nome, telefone });
-          void this.router.navigate(['../confirmacao'], { relativeTo: this.route });
+          void this.router.navigate(['../servicos'], { relativeTo: this.route });
         },
         error: (error: HttpErrorResponse) => {
           this.store.setError(error.message || 'Nao foi possivel salvar os dados do cliente.');
@@ -219,6 +235,11 @@ export class BookingShellPage {
 
   protected confirmBooking(): void {
     if (!this.canConfirmBooking()) {
+      return;
+    }
+
+    if (!this.visitorToken.token()) {
+      void this.router.navigate(['../cliente'], { relativeTo: this.route });
       return;
     }
 
@@ -250,10 +271,11 @@ export class BookingShellPage {
     const slug = this.store.slug() ?? this.route.parent?.snapshot.paramMap.get('slug') ?? '';
 
     this.store.reset();
+    this.visitorToken.setToken(null);
     this.customerName.set('');
     this.customerPhone.set('');
 
-    void this.router.navigate(['/agendar', slug, 'servicos']);
+    void this.router.navigate(['/agendar', slug, 'cliente']);
   }
 
   protected formatDate(value: string | null): string {

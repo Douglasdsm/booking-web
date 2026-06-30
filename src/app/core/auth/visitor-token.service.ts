@@ -12,14 +12,16 @@ export class VisitorTokenService {
   readonly token = this.tokenSignal.asReadonly();
 
   setToken(token: string | null): void {
-    this.tokenSignal.set(token);
+    const normalizedToken = this.normalizeToken(token);
+
+    this.tokenSignal.set(normalizedToken);
 
     if (!this.isBrowser) {
       return;
     }
 
-    if (token) {
-      localStorage.setItem(VISITOR_TOKEN_KEY, token);
+    if (normalizedToken) {
+      localStorage.setItem(VISITOR_TOKEN_KEY, normalizedToken);
       return;
     }
 
@@ -31,6 +33,12 @@ export class VisitorTokenService {
       return null;
     }
 
-    return localStorage.getItem(VISITOR_TOKEN_KEY);
+    return this.normalizeToken(localStorage.getItem(VISITOR_TOKEN_KEY));
+  }
+
+  private normalizeToken(token: string | null): string | null {
+    const normalizedToken = token?.trim().replace(/^Bearer\s+/i, '') ?? null;
+
+    return normalizedToken || null;
   }
 }

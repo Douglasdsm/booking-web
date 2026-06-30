@@ -13,7 +13,7 @@ import {
 
 const initialState: BookingState = {
   slug: null,
-  currentStep: 'servicos',
+  currentStep: 'cliente',
   company: null,
   services: [],
   professionals: [],
@@ -123,7 +123,7 @@ export class BookingStore {
     this.patch({ customer });
   }
 
-  setVisitorAccessToken(visitorAccessToken: string): void {
+  setVisitorAccessToken(visitorAccessToken: string | null): void {
     this.patch({ visitorAccessToken });
   }
 
