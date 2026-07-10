@@ -867,6 +867,225 @@
         }
       }
     },
+    "/empresaprofile": {
+      "post": {
+        "tags": [
+          "EmpresaProfile"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestRegisterEmpresaProfileJson"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestRegisterEmpresaProfileJson"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestRegisterEmpresaProfileJson"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseRegisteredEmpresaProfileJson"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseRegisteredEmpresaProfileJson"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseRegisteredEmpresaProfileJson"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "EmpresaProfile"
+        ],
+        "parameters": [
+          {
+            "name": "PessoaJuridicaID",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "FilialID",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseListEmpresaProfileJson"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseListEmpresaProfileJson"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseListEmpresaProfileJson"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "EmpresaProfile"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestUpdateEmpresaProfileJson"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestUpdateEmpresaProfileJson"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestUpdateEmpresaProfileJson"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "EmpresaProfile"
+        ],
+        "parameters": [
+          {
+            "name": "PessoaJuridicaID",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "EmpresaProfileID",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/empresaprofile/roles": {
+      "get": {
+        "tags": [
+          "EmpresaProfile"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseListEmpresaProfileRolesJson"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseListEmpresaProfileRolesJson"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseListEmpresaProfileRolesJson"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/endereco": {
       "post": {
         "tags": [
@@ -1464,6 +1683,35 @@
         }
       }
     },
+    "/filial/by-user": {
+      "get": {
+        "tags": [
+          "Filial"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseFiliaisJson"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseFiliaisJson"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseFiliaisJson"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/filial/{id}": {
       "get": {
         "tags": [
@@ -1618,6 +1866,44 @@
               "text/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fusohorario": {
+      "get": {
+        "tags": [
+          "FusoHorario"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ResponseFusoHorarioJson"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ResponseFusoHorarioJson"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ResponseFusoHorarioJson"
+                  }
                 }
               }
             }
@@ -2757,6 +3043,35 @@
         }
       }
     },
+    "/pessoajuridica/dados": {
+      "get": {
+        "tags": [
+          "PessoaJuridica"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseGetPessoaJuridicaJson"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseGetPessoaJuridicaJson"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseGetPessoaJuridicaJson"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/pessoajuridica/{id}": {
       "get": {
         "tags": [
@@ -2972,6 +3287,327 @@
           },
           "400": {
             "description": "Bad Request",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/pessoajuridica-booking-theme": {
+      "post": {
+        "tags": [
+          "PessoaJuridicaBookingTheme"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestRegisterPessoaJuridicaBookingThemeJson"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestRegisterPessoaJuridicaBookingThemeJson"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestRegisterPessoaJuridicaBookingThemeJson"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponsePessoaJuridicaBookingThemeJson"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponsePessoaJuridicaBookingThemeJson"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponsePessoaJuridicaBookingThemeJson"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "PessoaJuridicaBookingTheme"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "pessoaJuridicaID",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "ativo",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseListPessoaJuridicaBookingThemeJson"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseListPessoaJuridicaBookingThemeJson"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseListPessoaJuridicaBookingThemeJson"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/pessoajuridica-booking-theme/{id}": {
+      "get": {
+        "tags": [
+          "PessoaJuridicaBookingTheme"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponsePessoaJuridicaBookingThemeJson"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponsePessoaJuridicaBookingThemeJson"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponsePessoaJuridicaBookingThemeJson"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "PessoaJuridicaBookingTheme"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestUpdatePessoaJuridicaBookingThemeJson"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestUpdatePessoaJuridicaBookingThemeJson"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestUpdatePessoaJuridicaBookingThemeJson"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "PessoaJuridicaBookingTheme"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/pessoajuridica-booking-theme/public/{pessoaJuridicaId}": {
+      "get": {
+        "tags": [
+          "PessoaJuridicaBookingTheme"
+        ],
+        "parameters": [
+          {
+            "name": "pessoaJuridicaId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponsePublicPessoaJuridicaBookingThemeJson"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponsePublicPessoaJuridicaBookingThemeJson"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponsePublicPessoaJuridicaBookingThemeJson"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
             "content": {
               "text/plain": {
                 "schema": {
@@ -4035,27 +4671,79 @@
           }
         }
       },
-      "get": {
+      "put": {
         "tags": [
           "TabelaPreco"
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestUpdateTabelaPrecoJson"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestUpdateTabelaPrecoJson"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestUpdateTabelaPrecoJson"
+              }
+            }
+          }
+        },
         "responses": {
-          "200": {
-            "description": "Success",
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found",
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/ResponseListTabelaPrecoJson"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ResponseListTabelaPrecoJson"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ResponseListTabelaPrecoJson"
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "TabelaPreco"
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             }
@@ -4120,22 +4808,85 @@
         }
       }
     },
-    "/tabelapreco/{id}": {
+    "/tabelapreco/getall": {
       "get": {
         "tags": [
           "TabelaPreco"
         ],
         "parameters": [
           {
-            "name": "id",
-            "in": "path",
-            "required": true,
+            "name": "PessoaJuridicaID",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "FilialID",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "TabelaPrecoEmpresaId",
+            "in": "query",
             "schema": {
               "type": "integer",
               "format": "int64"
             }
           }
         ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseListTabelaPrecoJson"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseListTabelaPrecoJson"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseListTabelaPrecoJson"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tabelapreco/getbyid": {
+      "get": {
+        "tags": [
+          "TabelaPreco"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestGetByIdTabelaPrecoJson"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestGetByIdTabelaPrecoJson"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestGetByIdTabelaPrecoJson"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "Success",
@@ -4178,41 +4929,130 @@
             }
           }
         }
-      },
-      "put": {
+      }
+    },
+    "/tabelaprecoempresa": {
+      "post": {
         "tags": [
-          "TabelaPreco"
+          "TabelaPrecoEmpresa"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestRegisterTabelaPrecoEmpresaJson"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestRegisterTabelaPrecoEmpresaJson"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestRegisterTabelaPrecoEmpresaJson"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseRegisteredTabelaPrecoEmpresaJson"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseRegisteredTabelaPrecoEmpresaJson"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseRegisteredTabelaPrecoEmpresaJson"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "TabelaPrecoEmpresa"
         ],
         "parameters": [
           {
-            "name": "id",
-            "in": "path",
-            "required": true,
+            "name": "PessoaJuridicaID",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "FilialID",
+            "in": "query",
             "schema": {
               "type": "integer",
               "format": "int64"
             }
           }
         ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RequestUpdateTabelaPrecoJson"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RequestUpdateTabelaPrecoJson"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "$ref": "#/components/schemas/RequestUpdateTabelaPrecoJson"
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseListTabelaPrecoEmpresaJson"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseListTabelaPrecoEmpresaJson"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseListTabelaPrecoEmpresaJson"
+                }
               }
             }
           }
-        },
+        }
+      },
+      "delete": {
+        "tags": [
+          "TabelaPrecoEmpresa"
+        ],
+        "parameters": [
+          {
+            "name": "ID",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "PessoaJuridicaID",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "FilialID",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
         "responses": {
           "204": {
             "description": "No Content"
@@ -4238,22 +5078,107 @@
             }
           }
         }
-      },
-      "delete": {
+      }
+    },
+    "/tabelaprecoempresa/getbyid": {
+      "get": {
         "tags": [
-          "TabelaPreco"
+          "TabelaPrecoEmpresa"
         ],
         "parameters": [
           {
-            "name": "id",
-            "in": "path",
-            "required": true,
+            "name": "Id",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "PessoaJuridicaID",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "FilialID",
+            "in": "query",
             "schema": {
               "type": "integer",
               "format": "int64"
             }
           }
         ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseTabelaPrecoEmpresaJson"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseTabelaPrecoEmpresaJson"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseTabelaPrecoEmpresaJson"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tabelaprecoempresa/update": {
+      "put": {
+        "tags": [
+          "TabelaPrecoEmpresa"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestUpdateTabelaPrecoEmpresaJson"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestUpdateTabelaPrecoEmpresaJson"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestUpdateTabelaPrecoEmpresaJson"
+              }
+            }
+          }
+        },
         "responses": {
           "204": {
             "description": "No Content"
@@ -4619,6 +5544,33 @@
         "type": "integer",
         "format": "int32"
       },
+      "EmpresaProfilePermission": {
+        "enum": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "EmpresaProfileRole": {
+        "enum": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
       "ProblemDetails": {
         "type": "object",
         "properties": {
@@ -4766,6 +5718,28 @@
         },
         "additionalProperties": false
       },
+      "RequestGetByIdTabelaPrecoJson": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pessoaJuridicaID": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "tabelaDePrecoID": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "filialID": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "additionalProperties": false
+      },
       "RequestLoginJson": {
         "type": "object",
         "properties": {
@@ -4853,6 +5827,28 @@
         },
         "additionalProperties": false
       },
+      "RequestRegisterEmpresaProfileJson": {
+        "type": "object",
+        "properties": {
+          "pessoaJuridicaID": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "usuarioID": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "filialID": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "role": {
+            "$ref": "#/components/schemas/EmpresaProfileRole"
+          }
+        },
+        "additionalProperties": false
+      },
       "RequestRegisterEnderecoJson": {
         "type": "object",
         "properties": {
@@ -4913,6 +5909,10 @@
             "format": "int64"
           },
           "filialPessoaJuridicaID": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "fusoHorarioID": {
             "type": "integer",
             "format": "int64"
           }
@@ -5028,6 +6028,68 @@
         },
         "additionalProperties": false
       },
+      "RequestRegisterPessoaJuridicaBookingThemeJson": {
+        "type": "object",
+        "properties": {
+          "pessoaJuridicaID": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "corPrimaria": {
+            "type": "string",
+            "nullable": true
+          },
+          "corSecundaria": {
+            "type": "string",
+            "nullable": true
+          },
+          "corFundo": {
+            "type": "string",
+            "nullable": true
+          },
+          "corTexto": {
+            "type": "string",
+            "nullable": true
+          },
+          "corBotao": {
+            "type": "string",
+            "nullable": true
+          },
+          "corTextoBotao": {
+            "type": "string",
+            "nullable": true
+          },
+          "corBorda": {
+            "type": "string",
+            "nullable": true
+          },
+          "corCard": {
+            "type": "string",
+            "nullable": true
+          },
+          "corInput": {
+            "type": "string",
+            "nullable": true
+          },
+          "corTextoInput": {
+            "type": "string",
+            "nullable": true
+          },
+          "corErro": {
+            "type": "string",
+            "nullable": true
+          },
+          "corSucesso": {
+            "type": "string",
+            "nullable": true
+          },
+          "borderRadius": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "RequestRegisterPessoaJuridicaJson": {
         "type": "object",
         "properties": {
@@ -5107,6 +6169,28 @@
         },
         "additionalProperties": false
       },
+      "RequestRegisterTabelaPrecoEmpresaJson": {
+        "type": "object",
+        "properties": {
+          "pessoaJuridicaID": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "filialID": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "nome": {
+            "type": "string",
+            "nullable": true
+          },
+          "descricao": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "RequestRegisterTabelaPrecoJson": {
         "type": "object",
         "properties": {
@@ -5119,6 +6203,14 @@
             "format": "double"
           },
           "pessoaJuridicaID": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "filialID": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "tabelaPrecoEmpresaId": {
             "type": "integer",
             "format": "int64"
           }
@@ -5196,6 +6288,35 @@
         },
         "additionalProperties": false
       },
+      "RequestUpdateEmpresaProfileJson": {
+        "type": "object",
+        "properties": {
+          "empresaProfileID": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pessoaJuridicaID": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "usuarioID": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "filialID": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "role": {
+            "$ref": "#/components/schemas/EmpresaProfileRole"
+          },
+          "ativo": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
       "RequestUpdateEnderecoJson": {
         "type": "object",
         "properties": {
@@ -5258,6 +6379,10 @@
           "filialPessoaJuridicaID": {
             "type": "integer",
             "format": "int64"
+          },
+          "fusoHorarioID": {
+            "type": "integer",
+            "format": "int64"
           }
         },
         "additionalProperties": false
@@ -5312,6 +6437,64 @@
           "usuarioID": {
             "type": "integer",
             "format": "int64"
+          }
+        },
+        "additionalProperties": false
+      },
+      "RequestUpdatePessoaJuridicaBookingThemeJson": {
+        "type": "object",
+        "properties": {
+          "corPrimaria": {
+            "type": "string",
+            "nullable": true
+          },
+          "corSecundaria": {
+            "type": "string",
+            "nullable": true
+          },
+          "corFundo": {
+            "type": "string",
+            "nullable": true
+          },
+          "corTexto": {
+            "type": "string",
+            "nullable": true
+          },
+          "corBotao": {
+            "type": "string",
+            "nullable": true
+          },
+          "corTextoBotao": {
+            "type": "string",
+            "nullable": true
+          },
+          "corBorda": {
+            "type": "string",
+            "nullable": true
+          },
+          "corCard": {
+            "type": "string",
+            "nullable": true
+          },
+          "corInput": {
+            "type": "string",
+            "nullable": true
+          },
+          "corTextoInput": {
+            "type": "string",
+            "nullable": true
+          },
+          "corErro": {
+            "type": "string",
+            "nullable": true
+          },
+          "corSucesso": {
+            "type": "string",
+            "nullable": true
+          },
+          "borderRadius": {
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -5415,6 +6598,32 @@
         },
         "additionalProperties": false
       },
+      "RequestUpdateTabelaPrecoEmpresaJson": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pessoaJuridicaID": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "filialID": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "nome": {
+            "type": "string",
+            "nullable": true
+          },
+          "descricao": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "RequestUpdateTabelaPrecoJson": {
         "type": "object",
         "properties": {
@@ -5431,6 +6640,14 @@
             "format": "double"
           },
           "pessoaJuridicaID": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "filialID": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "tabelaPrecoEmpresaId": {
             "type": "integer",
             "format": "int64"
           }
@@ -5550,6 +6767,68 @@
         },
         "additionalProperties": false
       },
+      "ResponseEmpresaProfileJson": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pessoaJuridicaID": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "usuarioID": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "filialID": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "role": {
+            "$ref": "#/components/schemas/EmpresaProfileRole"
+          },
+          "ativo": {
+            "type": "boolean"
+          },
+          "excluido": {
+            "type": "boolean"
+          },
+          "dataCriacao": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "dataAtualizacao": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ResponseEmpresaProfileRoleJson": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "permissions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EmpresaProfilePermission"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "ResponseEnderecoJson": {
         "type": "object",
         "properties": {
@@ -5658,6 +6937,77 @@
           "filialPessoaJuridicaID": {
             "type": "integer",
             "format": "int64"
+          },
+          "fusoHorarioID": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "nome": {
+            "type": "string",
+            "nullable": true
+          },
+          "cnpj": {
+            "type": "string",
+            "nullable": true
+          },
+          "fusoHorario": {
+            "$ref": "#/components/schemas/ResponseFusoHorarioJson"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ResponseFusoHorarioJson": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "timeZoneId": {
+            "type": "string",
+            "nullable": true
+          },
+          "nome": {
+            "type": "string",
+            "nullable": true
+          },
+          "descricao": {
+            "type": "string",
+            "nullable": true
+          },
+          "pais": {
+            "type": "string",
+            "nullable": true
+          },
+          "utcOffsetPadrao": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ResponseGetPessoaJuridicaJson": {
+        "type": "object",
+        "properties": {
+          "pessoaJuridicaId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "cnpj": {
+            "type": "string",
+            "nullable": true
+          },
+          "nome": {
+            "type": "string",
+            "nullable": true
+          },
+          "pessoaID": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "slug": {
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -5713,6 +7063,32 @@
         },
         "additionalProperties": false
       },
+      "ResponseListEmpresaProfileJson": {
+        "type": "object",
+        "properties": {
+          "empresaProfiles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ResponseEmpresaProfileJson"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ResponseListEmpresaProfileRolesJson": {
+        "type": "object",
+        "properties": {
+          "roles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ResponseEmpresaProfileRoleJson"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "ResponseListEstadoJson": {
         "type": "object",
         "properties": {
@@ -5759,6 +7135,19 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/ResponsePessoaJson"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ResponseListPessoaJuridicaBookingThemeJson": {
+        "type": "object",
+        "properties": {
+          "temas": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ResponsePessoaJuridicaBookingThemeJson"
             },
             "nullable": true
           }
@@ -5824,6 +7213,19 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/ResponseServicosJson"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ResponseListTabelaPrecoEmpresaJson": {
+        "type": "object",
+        "properties": {
+          "tabelaPrecoEmpresas": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ResponseTabelaPrecoEmpresaJson"
             },
             "nullable": true
           }
@@ -5925,6 +7327,87 @@
         },
         "additionalProperties": false
       },
+      "ResponsePessoaJuridicaBookingThemeJson": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pessoaJuridicaID": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "corPrimaria": {
+            "type": "string",
+            "nullable": true
+          },
+          "corSecundaria": {
+            "type": "string",
+            "nullable": true
+          },
+          "corFundo": {
+            "type": "string",
+            "nullable": true
+          },
+          "corTexto": {
+            "type": "string",
+            "nullable": true
+          },
+          "corBotao": {
+            "type": "string",
+            "nullable": true
+          },
+          "corTextoBotao": {
+            "type": "string",
+            "nullable": true
+          },
+          "corBorda": {
+            "type": "string",
+            "nullable": true
+          },
+          "corCard": {
+            "type": "string",
+            "nullable": true
+          },
+          "corInput": {
+            "type": "string",
+            "nullable": true
+          },
+          "corTextoInput": {
+            "type": "string",
+            "nullable": true
+          },
+          "corErro": {
+            "type": "string",
+            "nullable": true
+          },
+          "corSucesso": {
+            "type": "string",
+            "nullable": true
+          },
+          "borderRadius": {
+            "type": "string",
+            "nullable": true
+          },
+          "ativo": {
+            "type": "boolean"
+          },
+          "excluido": {
+            "type": "boolean"
+          },
+          "dataCriacao": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "dataAtualizacao": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "ResponsePessoaJuridicaJson": {
         "type": "object",
         "properties": {
@@ -6010,6 +7493,77 @@
         },
         "additionalProperties": false
       },
+      "ResponsePublicPessoaJuridicaBookingThemeColorsJson": {
+        "type": "object",
+        "properties": {
+          "corPrimaria": {
+            "type": "string",
+            "nullable": true
+          },
+          "corSecundaria": {
+            "type": "string",
+            "nullable": true
+          },
+          "corFundo": {
+            "type": "string",
+            "nullable": true
+          },
+          "corTexto": {
+            "type": "string",
+            "nullable": true
+          },
+          "corBotao": {
+            "type": "string",
+            "nullable": true
+          },
+          "corTextoBotao": {
+            "type": "string",
+            "nullable": true
+          },
+          "corBorda": {
+            "type": "string",
+            "nullable": true
+          },
+          "corCard": {
+            "type": "string",
+            "nullable": true
+          },
+          "corInput": {
+            "type": "string",
+            "nullable": true
+          },
+          "corTextoInput": {
+            "type": "string",
+            "nullable": true
+          },
+          "corErro": {
+            "type": "string",
+            "nullable": true
+          },
+          "corSucesso": {
+            "type": "string",
+            "nullable": true
+          },
+          "borderRadius": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ResponsePublicPessoaJuridicaBookingThemeJson": {
+        "type": "object",
+        "properties": {
+          "pessoaJuridicaID": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "tema": {
+            "$ref": "#/components/schemas/ResponsePublicPessoaJuridicaBookingThemeColorsJson"
+          }
+        },
+        "additionalProperties": false
+      },
       "ResponseRegisteredAgendamentoJson": {
         "type": "object",
         "properties": {
@@ -6053,6 +7607,32 @@
         },
         "additionalProperties": false
       },
+      "ResponseRegisteredEmpresaProfileJson": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pessoaJuridicaID": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "usuarioID": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "filialID": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "role": {
+            "$ref": "#/components/schemas/EmpresaProfileRole"
+          }
+        },
+        "additionalProperties": false
+      },
       "ResponseRegisteredEnderecoJson": {
         "type": "object",
         "properties": {
@@ -6089,6 +7669,10 @@
             "format": "int64"
           },
           "filialPessoaJuridicaID": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "fusoHorarioID": {
             "type": "integer",
             "format": "int64"
           }
@@ -6220,6 +7804,33 @@
         },
         "additionalProperties": false
       },
+      "ResponseRegisteredTabelaPrecoEmpresaJson": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pessoaJuridicaID": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "filialID": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "nome": {
+            "type": "string",
+            "nullable": true
+          },
+          "descricao": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "ResponseRegisteredTabelaPrecoJson": {
         "type": "object",
         "properties": {
@@ -6232,6 +7843,15 @@
             "format": "double"
           },
           "pessoaJuridicaID": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "filialID": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "tabelaPrecoEmpresaId": {
             "type": "integer",
             "format": "int64"
           }
@@ -6333,6 +7953,33 @@
         },
         "additionalProperties": false
       },
+      "ResponseTabelaPrecoEmpresaJson": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pessoaJuridicaID": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "filialID": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "nome": {
+            "type": "string",
+            "nullable": true
+          },
+          "descricao": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "ResponseTabelaPrecoJson": {
         "type": "object",
         "properties": {
@@ -6349,6 +7996,15 @@
             "format": "double"
           },
           "pessoaJuridicaID": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "filialID": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "tabelaPrecoEmpresaId": {
             "type": "integer",
             "format": "int64"
           }

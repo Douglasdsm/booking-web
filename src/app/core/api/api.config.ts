@@ -2,6 +2,7 @@ import { InjectionToken } from '@angular/core';
 
 export interface ApiEndpointsConfig {
   bookingConfig: (slug: string) => string;
+  bookingTheme: (pessoaJuridicaId: number) => string;
   services: string;
   professionals: string;
   availableSlots: string;
@@ -22,6 +23,7 @@ export const apiConfig: ApiConfig = {
   swaggerUrl,
   endpoints: {
     bookingConfig: (slug) => `/booking/config/${slug}`,
+    bookingTheme: (pessoaJuridicaId) => `/pessoajuridica-booking-theme/public/${pessoaJuridicaId}`,
     services: '/servicoprice',
     professionals: '/prestador/list-prestador',
     availableSlots: '/horariodisponivel',

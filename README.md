@@ -1,4 +1,61 @@
 # BookingWeb
+DOCKER 
+Alterar código
+→ gerar nova imagem Docker
+→ testar localmente
+→ enviar ao Docker Hub
+→ atualizar o container na nuvem
+
+Na pasta do projeto: cd /e/Projetos/Barbers/Web/booking-web
+npm run build -- --configuration production
+
+2. Escolher a versão da imagem
+
+Evite trabalhar somente com latest. Use versões:
+
+
+v1
+v2
+v3
+
+Por exemplo, para a próxima publicação:
+docker build \
+  -t douglassmartins/agendamento-booking-web:v3 \
+  -t douglassmartins/agendamento-booking-web:latest \
+  .
+Isso cria duas tags apontando para a mesma imagem:
+douglassmartins/agendamento-booking-web:v3
+douglassmartins/agendamento-booking-web:latest
+
+Normalmente, não precisa usar --no-cache. Use somente quando suspeitar que o Docker está reutilizando arquivos antigos:
+
+docker build --no-cache \
+  -t douglassmartins/agendamento-booking-web:v3 \
+  -t douglassmartins/agendamento-booking-web:latest \
+  .
+3. Testar a nova imagem localmente
+
+Remova o container antigo:
+
+docker rm -f agendamento-booking-web 2>/dev/null || true
+
+Inicie a nova versão:
+
+docker run -d \
+  --name agendamento-booking-web \
+  --restart unless-stopped \
+  -p 4200:80 \
+  douglassmartins/agendamento-booking-web:v3
+
+
+Confira:
+docker ps
+Acesse:http://localhost:4200
+
+Envie a versão: docker push douglassmartins/agendamento-booking-web:v3
+
+
+
 
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.0.3.
 

@@ -12,6 +12,31 @@ export interface BookingCompanyConfig {
   nomeEmpresa: string | null;
   slug: string | null;
   logoUrl: string | null;
+  imageUrl?: string | null;
+  url?: string | null;
+  caminhoImagem?: string | null;
+  imagemUrl?: string | null;
+}
+
+export interface BookingTheme {
+  corPrimaria: string;
+  corSecundaria: string;
+  corFundo: string;
+  corTexto: string;
+  corBotao: string;
+  corTextoBotao: string;
+  corBorda: string;
+  corCard: string;
+  corInput: string;
+  corTextoInput: string;
+  corErro: string;
+  corSucesso: string;
+  borderRadius: string;
+}
+
+export interface BookingThemeResponse {
+  pessoaJuridicaID: number;
+  tema: BookingTheme | null;
 }
 
 export interface BookingService {

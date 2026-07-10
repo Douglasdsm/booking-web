@@ -1,461 +1,86 @@
-<main class="booking-shell">
-  <header class="booking-header">
-    <div>
-      <p class="booking-header__eyebrow">Agendamento online</p>
-      <h1>{{ store.company()?.nomeEmpresa || 'Escolha seu horario' }}</h1>
-    </div>
+<app-booking-layout [companyName]="store.company()?.nomeEmpresa ?? null" [logoUrl]="companyLogoUrl()">
+  <app-booking-stepper
+    booking-stepper
+    [currentIndex]="currentStepIndex()"
+    [total]="steps.length"
+  />
 
-    @if (store.company()?.logoUrl) {
-      <img [src]="store.company()?.logoUrl" [alt]="store.company()?.nomeEmpresa || 'Logo'" />
+  @switch (store.currentStep()) {
+    @case ('cliente') {
+      <app-booking-cliente-step
+        [name]="customerName()"
+        [phone]="customerPhone()"
+        [error]="store.error()"
+        (nameChange)="customerName.set($event)"
+        (phoneChange)="customerPhone.set($event)"
+        (submit)="submitCustomer()"
+      />
     }
-  </header>
 
-  <nav class="booking-steps" aria-label="Etapas do agendamento">
-    @for (step of steps; track step; let index = $index) {
-      <a
-        [routerLink]="stepLink(step)"
-        [class.booking-steps__item--active]="step === store.currentStep()"
-        class="booking-steps__item"
-      >
-        <span>{{ index + 1 }}</span>
-        {{ labels[step] }}
-      </a>
+    @case ('servicos') {
+      <app-booking-servico-step
+        [services]="store.services()"
+        [selectedServices]="store.selectedServices()"
+        [loading]="store.loading()"
+        [error]="store.error()"
+        (toggle)="toggleService($event)"
+      />
     }
-  </nav>
 
-  <section class="booking-content">
-    <p class="booking-content__counter">
-      Etapa {{ currentStepIndex() + 1 }} de {{ steps.length }}
-    </p>
-
-    @switch (store.currentStep()) {
-      @case ('servicos') {
-        <div class="services-page">
-          <div class="services-page__heading">
-            <h2>Escolha os servicos</h2>
-            <p>Selecione um ou mais servicos para calcular o tempo e o valor do agendamento.</p>
-          </div>
-
-          @if (store.loading()) {
-            <div class="services-state" aria-live="polite">Carregando servicos...</div>
-          } @else if (store.error()) {
-            <div class="services-state services-state--error" role="alert">{{ store.error() }}</div>
-          } @else if (!store.services().length) {
-            <div class="services-state">Nenhum servico disponivel no momento.</div>
-          } @else {
-            <div class="service-list" aria-label="Servicos disponiveis">
-              @for (service of store.services(); track service.servicoId) {
-                <button
-                  type="button"
-                  class="service-card"
-                  [class.service-card--selected]="isServiceSelected(service)"
-                  (click)="toggleService(service)"
-                  [attr.aria-pressed]="isServiceSelected(service)"
-                >
-                  <span class="service-card__check" aria-hidden="true">
-                    @if (isServiceSelected(service)) {
-                      OK
-                    }
-                  </span>
-
-                  <span class="service-card__content">
-                    <span class="service-card__title">{{ service.nome || 'Servico' }}</span>
-
-                    @if (service.descricao) {
-                      <span class="service-card__description">{{ service.descricao }}</span>
-                    }
-
-                    <span class="service-card__meta">
-                      <strong>{{ service.duracaoMinutos }} min</strong>
-                      <strong>{{ formatCurrency(service.preco) }}</strong>
-                    </span>
-                  </span>
-                </button>
-              }
-            </div>
-          }
-        </div>
-      }
-      @case ('prestadores') {
-        <div class="professionals-page">
-          <div class="professionals-page__heading">
-            <h2>Escolha o prestador</h2>
-            <p>Selecione quem vai realizar o atendimento.</p>
-          </div>
-
-          @if (store.loading()) {
-            <div class="services-state" aria-live="polite">Carregando prestadores...</div>
-          } @else if (store.error()) {
-            <div class="services-state services-state--error" role="alert">{{ store.error() }}</div>
-          } @else if (!store.professionals().length) {
-            <div class="services-state">Nenhum prestador disponivel no momento.</div>
-          } @else {
-            <div class="professional-list" aria-label="Prestadores disponiveis">
-              @for (professional of store.professionals(); track professional.usuarioID) {
-                <button
-                  type="button"
-                  class="professional-card"
-                  [class.professional-card--selected]="isProfessionalSelected(professional)"
-                  (click)="selectProfessional(professional)"
-                  [attr.aria-pressed]="isProfessionalSelected(professional)"
-                >
-                  @if (professional.url) {
-                    <img
-                      class="professional-card__photo"
-                      [src]="professional.url"
-                      [alt]="professional.nome || 'Prestador'"
-                    />
-                  } @else {
-                    <span class="professional-card__photo professional-card__photo--fallback">
-                      {{ professionalInitial(professional) }}
-                    </span>
-                  }
-
-                  <span class="professional-card__content">
-                    <span class="professional-card__name">{{ professional.nome || 'Prestador' }}</span>
-
-                    @if (isProfessionalSelected(professional)) {
-                      <span class="professional-card__selected">Selecionado</span>
-                    }
-                  </span>
-                </button>
-              }
-            </div>
-          }
-        </div>
-      }
-      @case ('agenda') {
-        <div class="agenda-page">
-          <div>
-            <h2>Escolha o horario</h2>
-            <p>{{ store.selectedProfessional()?.nome || 'Prestador' }} | {{ store.totalDurationMinutes() }} min</p>
-          </div>
-
-          @if (!store.selectedProfessional() || !store.totalDurationMinutes()) {
-            <div class="services-state">Selecione servicos e prestador antes de escolher o horario.</div>
-          } @else {
-            <label class="date-field">
-              <span>Data</span>
-              <input
-                type="date"
-                [min]="today"
-                [value]="store.selectedDate() || ''"
-                (change)="onDateChange($event)"
-              />
-            </label>
-
-            @if (store.loading()) {
-              <div class="services-state" aria-live="polite">Carregando horarios...</div>
-            } @else if (store.error()) {
-              <div class="services-state services-state--error" role="alert">{{ store.error() }}</div>
-            } @else if (!store.selectedDate()) {
-              <div class="services-state">Escolha uma data para ver os horarios disponiveis.</div>
-            } @else if (!store.availableSlots().length) {
-              <div class="services-state">Nenhum horario disponivel para esta data.</div>
-            } @else {
-              <div class="slot-grid" aria-label="Horarios disponiveis">
-                @for (slot of store.availableSlots(); track slotKey(slot)) {
-                  <button
-                    type="button"
-                    class="slot-button"
-                    [class.slot-button--selected]="isSlotSelected(slot)"
-                    (click)="selectSlot(slot)"
-                    [attr.aria-pressed]="isSlotSelected(slot)"
-                  >
-                    {{ formatSlotTime(slot.horaInicio) }}
-                  </button>
-                }
-              </div>
-            }
-          }
-        </div>
-      }
-      @case ('cliente') {
-        <div class="customer-page">
-          <div>
-            <h2>Seus dados</h2>
-            <p>Informe os dados para identificar o agendamento.</p>
-          </div>
-
-          <form id="customer-form" class="customer-form" (submit)="$event.preventDefault(); submitCustomer()">
-            <label class="date-field">
-              <span>Nome</span>
-              <input
-                type="text"
-                autocomplete="name"
-                required
-                [value]="customerName()"
-                (input)="onCustomerNameInput($event)"
-              />
-            </label>
-
-            <label class="date-field">
-              <span>Telefone</span>
-              <input
-                type="tel"
-                autocomplete="tel"
-                inputmode="tel"
-                required
-                [value]="customerPhone()"
-                (input)="onCustomerPhoneInput($event)"
-              />
-            </label>
-
-            @if (store.error()) {
-              <div class="services-state services-state--error" role="alert">{{ store.error() }}</div>
-            }
-          </form>
-        </div>
-      }
-      @case ('confirmacao') {
-        <div class="grid gap-4">
-          <div class="grid gap-1">
-            <h2>Confirme o agendamento</h2>
-            <p class="text-sm text-slate-600">Revise os dados antes de concluir.</p>
-          </div>
-
-          <section class="grid gap-3 rounded-lg border border-slate-200 p-4">
-            <div class="flex items-center justify-between gap-3">
-              <h3 class="m-0 text-base font-bold">Servicos</h3>
-              <span class="rounded-full bg-slate-100 px-3 py-1 text-sm font-bold text-slate-700">
-                {{ store.selectedServices().length }} selecionado(s)
-              </span>
-            </div>
-
-            <div class="grid gap-2">
-              @for (service of store.selectedServices(); track service.servicoId) {
-                <div class="flex justify-between gap-3 text-sm">
-                  <span class="text-slate-700">{{ service.nome || 'Servico' }}</span>
-                  <strong class="text-right">{{ service.duracaoMinutos }} min | {{ formatCurrency(service.preco) }}</strong>
-                </div>
-              }
-            </div>
-          </section>
-
-          <section class="grid gap-3 rounded-lg border border-slate-200 p-4">
-            <h3 class="m-0 text-base font-bold">Resumo</h3>
-
-            <div class="flex justify-between gap-3 text-sm">
-              <span class="text-slate-600">Valor total</span>
-              <strong class="text-right">{{ formatCurrency(store.totalPrice()) }}</strong>
-            </div>
-
-            <div class="flex justify-between gap-3 text-sm">
-              <span class="text-slate-600">Duracao total</span>
-              <strong class="text-right">{{ store.totalDurationMinutes() }} min</strong>
-            </div>
-          </section>
-
-          <section class="grid gap-3 rounded-lg border border-slate-200 p-4">
-            <h3 class="m-0 text-base font-bold">Atendimento</h3>
-
-            <div class="flex justify-between gap-3 text-sm">
-              <span class="text-slate-600">Prestador</span>
-              <strong class="text-right">{{ store.selectedProfessional()?.nome || 'Nao selecionado' }}</strong>
-            </div>
-
-            <div class="flex justify-between gap-3 text-sm">
-              <span class="text-slate-600">Data</span>
-              <strong class="text-right">{{ formatDate(store.selectedDate()) }}</strong>
-            </div>
-
-            <div class="flex justify-between gap-3 text-sm">
-              <span class="text-slate-600">Horario</span>
-              <strong class="text-right">
-                @if (store.selectedSlot()) {
-                  {{ formatSlotTime(store.selectedSlot()!.horaInicio) }}
-                } @else {
-                  Nao selecionado
-                }
-              </strong>
-            </div>
-          </section>
-
-          <section class="grid gap-3 rounded-lg border border-slate-200 p-4">
-            <h3 class="m-0 text-base font-bold">Cliente</h3>
-
-            <div class="flex justify-between gap-3 text-sm">
-              <span class="text-slate-600">Nome</span>
-              <strong class="text-right">{{ store.customer()?.nome || 'Nao informado' }}</strong>
-            </div>
-
-            <div class="flex justify-between gap-3 text-sm">
-              <span class="text-slate-600">Telefone</span>
-              <strong class="text-right">{{ store.customer()?.telefone || 'Nao informado' }}</strong>
-            </div>
-          </section>
-
-          @if (store.error()) {
-            <div class="services-state services-state--error" role="alert">{{ store.error() }}</div>
-          }
-        </div>
-      }
-      @case ('sucesso') {
-        <div class="grid gap-4">
-          <section class="grid gap-2 rounded-lg border border-green-200 bg-green-50 p-4 text-center">
-            <h2 class="m-0 text-xl font-bold text-green-900">Agendamento confirmado</h2>
-            <p class="m-0 text-sm text-green-800">Seu horario foi reservado com sucesso.</p>
-
-            @if (store.createdBooking()) {
-              <p class="m-0 text-sm font-bold text-green-900">
-                Protocolo #{{ store.createdBooking()?.id }}
-              </p>
-            }
-          </section>
-
-          <section class="grid gap-3 rounded-lg border border-slate-200 p-4">
-            <h3 class="m-0 text-base font-bold">Resumo</h3>
-
-            <div class="grid gap-2">
-              <span class="text-sm font-bold text-slate-600">Servicos</span>
-              @for (service of store.selectedServices(); track service.servicoId) {
-                <div class="flex justify-between gap-3 text-sm">
-                  <span class="text-slate-700">{{ service.nome || 'Servico' }}</span>
-                  <strong class="text-right">{{ formatCurrency(service.preco) }}</strong>
-                </div>
-              }
-            </div>
-
-            <div class="flex justify-between gap-3 text-sm">
-              <span class="text-slate-600">Prestador</span>
-              <strong class="text-right">{{ store.selectedProfessional()?.nome || 'Nao informado' }}</strong>
-            </div>
-
-            <div class="flex justify-between gap-3 text-sm">
-              <span class="text-slate-600">Data</span>
-              <strong class="text-right">{{ formatDate(store.selectedDate()) }}</strong>
-            </div>
-
-            <div class="flex justify-between gap-3 text-sm">
-              <span class="text-slate-600">Horario</span>
-              <strong class="text-right">
-                @if (store.selectedSlot()) {
-                  {{ formatSlotTime(store.selectedSlot()!.horaInicio) }}
-                } @else {
-                  Nao informado
-                }
-              </strong>
-            </div>
-
-            <div class="flex justify-between gap-3 border-t border-slate-200 pt-3 text-sm">
-              <span class="font-bold text-slate-700">Valor total</span>
-              <strong class="text-right">{{ formatCurrency(store.totalPrice()) }}</strong>
-            </div>
-          </section>
-
-          <button
-            type="button"
-            class="min-h-12 rounded-lg bg-slate-950 px-4 font-bold text-white"
-            (click)="startNewBooking()"
-          >
-            Novo agendamento
-          </button>
-        </div>
-      }
+    @case ('prestadores') {
+      <app-booking-profissional-step
+        [professionals]="store.professionals()"
+        [selectedProfessional]="store.selectedProfessional()"
+        [loading]="store.loading()"
+        [error]="store.error()"
+        (select)="selectProfessional($event)"
+      />
     }
-  </section>
 
-  @if (store.currentStep() === 'servicos') {
-    <aside class="booking-summary" aria-label="Resumo dos servicos selecionados">
-      <div>
-        <span>{{ store.selectedServices().length }} selecionado(s)</span>
-        <strong>{{ store.totalDurationMinutes() }} min | {{ formatCurrency(store.totalPrice()) }}</strong>
-      </div>
+    @case ('agenda') {
+      <app-booking-data-horario-step
+        [dates]="dateOptions()"
+        [selectedDate]="store.selectedDate()"
+        [slots]="store.availableSlots()"
+        [selectedSlotKey]="selectedSlotKey()"
+        [canChooseSchedule]="!!store.selectedProfessional() && !!store.totalDurationMinutes()"
+        [loading]="store.loading()"
+        [error]="store.error()"
+        (dateChange)="selectDate($event)"
+        (slotChange)="selectSlot($event)"
+      />
+    }
 
-      <button
-        type="button"
-        class="booking-summary__button"
-        [disabled]="!store.selectedServices().length"
-        (click)="continueToProfessionals()"
-      >
-        Continuar
-      </button>
-    </aside>
+    @case ('confirmacao') {
+      <app-booking-confirmacao-step
+        [customer]="store.customer()"
+        [services]="store.selectedServices()"
+        [professional]="store.selectedProfessional()"
+        [date]="store.selectedDate()"
+        [slot]="store.selectedSlot()"
+        [totalPrice]="store.totalPrice()"
+        [error]="store.error()"
+      />
+    }
+
+    @case ('sucesso') {
+      <app-booking-sucesso-step
+        [services]="store.selectedServices()"
+        [professional]="store.selectedProfessional()"
+        [date]="store.selectedDate()"
+        [slot]="store.selectedSlot()"
+        [totalPrice]="store.totalPrice()"
+      />
+    }
   }
 
-  @if (store.currentStep() === 'prestadores') {
-    <aside class="booking-summary" aria-label="Resumo do prestador selecionado">
-      <div>
-        <span>Prestador</span>
-        <strong>{{ store.selectedProfessional()?.nome || 'Nenhum selecionado' }}</strong>
-      </div>
-
-      <button
-        type="button"
-        class="booking-summary__button"
-        [disabled]="!store.selectedProfessional()"
-        (click)="continueToSchedule()"
-      >
-        Continuar
-      </button>
-    </aside>
-  }
-
-  @if (store.currentStep() === 'agenda') {
-    <aside class="booking-summary" aria-label="Resumo do horario selecionado">
-      <div>
-        <span>Horario</span>
-        <strong>
-          @if (store.selectedSlot()) {
-            {{ formatSlotTime(store.selectedSlot()!.horaInicio) }}
-          } @else {
-            Nenhum selecionado
-          }
-        </strong>
-      </div>
-
-      <button
-        type="button"
-        class="booking-summary__button"
-        [disabled]="!store.selectedSlot()"
-        (click)="continueToCustomer()"
-      >
-        Continuar
-      </button>
-    </aside>
-  }
-
-  @if (store.currentStep() === 'cliente') {
-    <aside class="booking-summary" aria-label="Resumo dos dados do cliente">
-      <div>
-        <span>Cliente</span>
-        <strong>{{ customerName().trim() || 'Informe seus dados' }}</strong>
-      </div>
-
-      <button
-        type="submit"
-        form="customer-form"
-        class="booking-summary__button"
-        [disabled]="!isCustomerFormValid() || store.loading()"
-      >
-        @if (store.loading()) {
-          Salvando...
-        } @else {
-          Continuar
-        }
-      </button>
-    </aside>
-  }
-
-  @if (store.currentStep() === 'confirmacao') {
-    <aside class="booking-summary" aria-label="Confirmar agendamento">
-      <div>
-        <span>Total</span>
-        <strong>{{ store.totalDurationMinutes() }} min | {{ formatCurrency(store.totalPrice()) }}</strong>
-      </div>
-
-      <button
-        type="button"
-        class="booking-summary__button"
-        [disabled]="!canConfirmBooking() || store.loading()"
-        (click)="confirmBooking()"
-      >
-        @if (store.loading()) {
-          Confirmando...
-        } @else {
-          Confirmar Agendamento
-        }
-      </button>
-    </aside>
-  }
-</main>
+  <app-booking-footer-actions
+    booking-footer
+    [continueText]="footerContinueText()"
+    [continueDisabled]="continueDisabled()"
+    [backDisabled]="backDisabled()"
+    [showBack]="!backDisabled()"
+    (back)="goBack()"
+    (continue)="continueCurrentStep()"
+  />
+</app-booking-layout>
