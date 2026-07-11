@@ -22,6 +22,9 @@ Por exemplo, para a próxima publicação:
 docker build \
   -t douglassmartins/agendamento-booking-web:v3 \
   -t douglassmartins/agendamento-booking-web:latest \
+
+
+  docker build -t douglassmartins/agendamento-booking-web:latest .
   .
 Isso cria duas tags apontando para a mesma imagem:
 douglassmartins/agendamento-booking-web:v3
@@ -33,12 +36,17 @@ docker build --no-cache \
   -t douglassmartins/agendamento-booking-web:v3 \
   -t douglassmartins/agendamento-booking-web:latest \
   .
+
+
+  docker build --no-cache -t douglassmartins/agendamento-booking-web:latest .
 3. Testar a nova imagem localmente
 
 Remova o container antigo:
 
 docker rm -f agendamento-booking-web 2>/dev/null || true
 
+
+docker rm -f agendamento-booking-web
 Inicie a nova versão:
 
 docker run -d \
@@ -47,14 +55,34 @@ docker run -d \
   -p 4200:80 \
   douglassmartins/agendamento-booking-web:v3
 
+docker run -d  --name agendamento-booking-web  --restart unless-stopped  -p 4200:80  douglassmartins/agendamento-booking-web:v3
 
+
+docker run -d  --name agendamento-booking-web  --restart unless-stopped  -p 4200:80  douglassmartins/agendamento-booking-web:latest
 Confira:
 docker ps
 Acesse:http://localhost:4200
 
 Envie a versão: docker push douglassmartins/agendamento-booking-web:v3
 
+docker push douglassmartins/agendamento-booking-web:latest
 
+
+
+
+atualizar:  docker pull douglassmartins/agendamento-booking-web:latest
+Remover o container atual
+    docker stop agendamento-booking-web
+    docker rm agendamento-booking-web
+
+
+
+docker run -d \
+  --name agendamento-booking-web \
+  --restart unless-stopped \
+  -p 4200:80 \
+  douglassmartins/agendamento-booking-web:latest
+ 
 
 
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.0.3.

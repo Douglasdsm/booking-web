@@ -49,6 +49,7 @@ export interface BookingService {
 }
 
 export interface BookingProfessional {
+  id: number;
   nome: string | null;
   usuarioID: number;
   pessoaID: number;

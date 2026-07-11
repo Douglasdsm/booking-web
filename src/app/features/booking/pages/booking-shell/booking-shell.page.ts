@@ -420,7 +420,7 @@ export class BookingShellPage {
 
     this.api
       .getAvailableSlots({
-        prestadorId: professional.usuarioID,
+        prestadorId: professional.id,
         data: `${date}T00:00:00.000Z`,
         duracaoMinutos: duration,
       })
@@ -451,7 +451,7 @@ export class BookingShellPage {
       usuarioID: 0,
       pessoaJuridicaID: company.pessoaJuridicaID,
       filialID: company.filialID,
-      prestadorID: professional.usuarioID,
+      prestadorID: professional.id,
       ordemServico: {
         valorTotal: this.store.totalPrice(),
         descontoTotal: 0,

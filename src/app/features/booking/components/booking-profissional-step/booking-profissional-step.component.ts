@@ -19,12 +19,12 @@ import { BookingProfessional } from '../../models/booking.models';
         <div class="booking-state">Nenhum profissional dispon&iacute;vel no momento.</div>
       } @else {
         <div class="booking-card-list" aria-label="Profissionais dispon&iacute;veis">
-          @for (professional of professionals(); track professional.usuarioID) {
+          @for (professional of professionals(); track professional.id) {
             <button
               type="button"
               class="booking-select-card"
-              [class.booking-select-card--selected]="selectedProfessional()?.usuarioID === professional.usuarioID"
-              [attr.aria-pressed]="selectedProfessional()?.usuarioID === professional.usuarioID"
+              [class.booking-select-card--selected]="selectedProfessional()?.id === professional.id"
+              [attr.aria-pressed]="selectedProfessional()?.id === professional.id"
               (click)="select.emit(professional)"
             >
               @if (professional.url) {
@@ -37,13 +37,13 @@ import { BookingProfessional } from '../../models/booking.models';
 
               <span class="booking-card-copy">
                 <strong>{{ professional.nome || 'Profissional' }}</strong>
-                @if (selectedProfessional()?.usuarioID === professional.usuarioID) {
+                @if (selectedProfessional()?.id === professional.id) {
                   <small>Selecionado</small>
                 }
               </span>
 
               <span class="booking-card-check" aria-hidden="true">
-                {{ selectedProfessional()?.usuarioID === professional.usuarioID ? '✓' : '' }}
+                {{ selectedProfessional()?.id === professional.id ? '✓' : '' }}
               </span>
             </button>
           }
