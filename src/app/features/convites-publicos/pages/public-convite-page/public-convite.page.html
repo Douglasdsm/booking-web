@@ -1,0 +1,356 @@
+<main class="public-invite-shell" [ngClass]="statusClass()">
+  <section class="public-invite-header">
+    <div>
+      <p class="eyebrow">Convite</p>
+      <h1>{{ convite()?.empresa || pageTitle() }}</h1>
+      @if (convite()?.filial) {
+        <p class="unit">{{ convite()?.filial }}</p>
+      }
+    </div>
+
+    <span class="status-pill" data-testid="invite-status">{{ convite() ? statusLabel(convite()!) : pageTitle() }}</span>
+  </section>
+
+  <section class="public-invite-card" data-testid="public-invite-card" aria-live="polite">
+    @if (viewState() === 'loading') {
+      <div class="state-block" data-testid="loading-state">
+        <div class="loading-mark"></div>
+        <h2>{{ pageTitle() }}</h2>
+        <p>{{ pageMessage() }}</p>
+      </div>
+    } @else if (convite(); as currentInvite) {
+      <div class="invite-summary">
+        <div>
+          <p class="eyebrow">Tipo</p>
+          <h2>{{ tipoLabel(currentInvite) }}</h2>
+        </div>
+        <p>{{ pageMessage() }}</p>
+      </div>
+
+      <div class="info-grid">
+        <article>
+          <span>Nome informado</span>
+          <strong>{{ currentInvite.nomeInformado || 'Nao informado' }}</strong>
+        </article>
+        <article>
+          <span>Telefone</span>
+          <strong data-testid="masked-phone">{{ currentInvite.telefoneMascarado || 'Nao informado' }}</strong>
+        </article>
+        <article>
+          <span>E-mail</span>
+          <strong data-testid="masked-email">{{ currentInvite.emailMascarado || 'Nao informado' }}</strong>
+        </article>
+        <article>
+          <span>Data de expiracao</span>
+          <strong>{{ dateLabel(currentInvite) }}</strong>
+        </article>
+        <article>
+          <span>Status</span>
+          <strong>{{ statusLabel(currentInvite) }}</strong>
+        </article>
+        <article>
+          <span>Versao do termo</span>
+          <strong>{{ termLabel(currentInvite) }}</strong>
+        </article>
+      </div>
+
+      <section class="content-section">
+        <h3>Dados compartilhados apos aceite</h3>
+        <div class="scope-list" data-testid="scope-list">
+          @for (scope of scopeLabels(); track scope) {
+            <span>{{ scope }}</span>
+          } @empty {
+            <span>Nenhum dado obrigatorio informado</span>
+          }
+        </div>
+      </section>
+
+      @if (currentInvite.tipoConvite === 1) {
+        <section class="content-section" data-testid="client-invite-copy">
+          <h3>Vinculo de cliente</h3>
+          <p>
+            A empresa convidou voce para estabelecer um vinculo de cliente. Seus dados continuam sob
+            seu controle e os itens acima so serao compartilhados depois do aceite.
+          </p>
+        </section>
+      }
+
+      @if (currentInvite.prestador; as provider) {
+        <section class="content-section provider-section" data-testid="provider-config">
+          <h3>Configuracao de prestador</h3>
+          <div class="info-grid compact">
+            <article>
+              <span>Acesso ao painel</span>
+              <strong>{{ yesNo(provider.deveAcessarPainel) }}</strong>
+            </article>
+            <article>
+              <span>Exibido no agendamento publico</span>
+              <strong>{{ yesNo(provider.deveAparecerBooking) }}</strong>
+            </article>
+            <article>
+              <span>Perfil</span>
+              <strong>{{ provider.role || 'Sem acesso ao painel' }}</strong>
+            </article>
+          </div>
+
+          <div class="services-list">
+            <span>Servicos</span>
+            <div>
+              @for (service of provider.servicos ?? []; track service) {
+                <strong>{{ service }}</strong>
+              } @empty {
+                <strong>Nenhum servico informado</strong>
+              }
+            </div>
+          </div>
+        </section>
+      }
+
+      @if (acceptSuccess(); as result) {
+        <section class="accept-result" data-testid="accept-result">
+          <h3>Convite aceito</h3>
+          @if (providerAcceptSuccess(); as providerResult) {
+            <p>Convite aceito. Seu vinculo como prestador foi criado para esta empresa.</p>
+          } @else {
+            <p>Convite aceito. Agora voce esta vinculado como cliente desta empresa.</p>
+          }
+
+          <div class="info-grid compact">
+            <article>
+              <span>Status</span>
+              <strong>{{ statusLabel(currentInvite) }}</strong>
+            </article>
+            <article>
+              <span>Empresa</span>
+              <strong>{{ result.empresa || currentInvite.empresa || 'Nao informado' }}</strong>
+            </article>
+            <article>
+              <span>Unidade</span>
+              <strong>{{ result.filial || currentInvite.filial || 'Nao informado' }}</strong>
+            </article>
+            <article>
+              <span>Nome</span>
+              <strong>{{ result.nome || 'Nao informado' }}</strong>
+            </article>
+            <article>
+              <span>Versao do termo</span>
+              <strong>{{ termLabel(currentInvite) }}</strong>
+            </article>
+          </div>
+
+          @if (providerAcceptSuccess(); as providerResult) {
+            <div class="info-grid compact" data-testid="provider-accept-result">
+              <article>
+                <span>Acesso ao painel</span>
+                <strong>{{ yesNo(providerResult.deveAcessarPainel) }}</strong>
+              </article>
+              <article>
+                <span>Perfil</span>
+                <strong>{{ providerResult.role || 'Sem acesso ao painel' }}</strong>
+              </article>
+              <article>
+                <span>Exibido no agendamento publico</span>
+                <strong>{{ yesNo(providerResult.apareceBooking) }}</strong>
+              </article>
+            </div>
+
+            <div class="services-list">
+              <span>Servicos vinculados</span>
+              <div>
+                @for (service of providerResult.servicos ?? []; track service) {
+                  <strong>{{ service }}</strong>
+                } @empty {
+                  <strong>Nenhum servico informado</strong>
+                }
+              </div>
+            </div>
+          }
+
+          <div class="scope-list" data-testid="accepted-scope-list">
+            @for (scope of acceptedScopeLabels(); track scope) {
+              <span>{{ scope }}</span>
+            }
+          </div>
+        </section>
+      } @else if (showProviderAcceptForm()) {
+        <section class="accept-form" data-testid="provider-accept-form">
+          <div>
+            <h3>Confirmar aceite como prestador</h3>
+            <p>
+              A configuracao profissional foi definida pela empresa neste convite. Se algo estiver
+              incorreto, solicite outro convite antes de aceitar.
+            </p>
+          </div>
+
+          @if (termUpdated()) {
+            <p class="form-warning" data-testid="term-updated">
+              O termo foi atualizado. Revise os dados e confirme novamente.
+            </p>
+          }
+
+          <div class="form-field">
+            <label for="provider-invite-name">Nome</label>
+            <input
+              id="provider-invite-name"
+              type="text"
+              autocomplete="name"
+              [value]="acceptForm().nome"
+              (input)="updateNome($event)"
+              data-testid="accept-provider-name"
+            />
+            <small>Usado somente se sua conta ainda nao possuir um perfil de pessoa.</small>
+          </div>
+
+          <div class="form-field">
+            <label for="provider-invite-cpf">CPF opcional</label>
+            <input
+              id="provider-invite-cpf"
+              type="text"
+              inputmode="numeric"
+              autocomplete="off"
+              [value]="cpfValue()"
+              (input)="updateCpf($event)"
+              data-testid="accept-provider-cpf"
+            />
+          </div>
+
+          <label class="confirm-row" for="provider-invite-confirm">
+            <input
+              id="provider-invite-confirm"
+              type="checkbox"
+              [checked]="acceptForm().termoConfirmado"
+              (change)="updateTermoConfirmado($event)"
+              data-testid="accept-provider-confirm"
+            />
+            <span>Li as condicoes do convite e autorizo o compartilhamento dos dados indicados com esta empresa.</span>
+          </label>
+
+          @if (acceptValidationErrors().length > 0) {
+            <div class="form-errors" data-testid="accept-errors">
+              @for (error of acceptValidationErrors(); track error) {
+                <p>{{ error }}</p>
+              }
+            </div>
+          }
+
+          @if (acceptTemporaryError()) {
+            <p class="form-errors" data-testid="accept-temporary-error">{{ acceptTemporaryError() }}</p>
+          }
+
+          <div class="action-row">
+            <button
+              type="button"
+              [disabled]="!canSubmitProviderAccept()"
+              (click)="aceitarPrestador()"
+              data-testid="accept-provider-button"
+            >
+              {{ accepting() ? 'Aceitando...' : 'Aceitar convite' }}
+            </button>
+            <button type="button" class="secondary-button" (click)="logoutPermanent()">Sair</button>
+          </div>
+        </section>
+      } @else if (showClientAcceptForm()) {
+        <section class="accept-form" data-testid="client-accept-form">
+          <div>
+            <h3>Confirmar aceite</h3>
+            <p>
+              A empresa podera consultar somente os dados indicados. Ela nao podera alterar
+              diretamente seus dados globais de pessoa.
+            </p>
+          </div>
+
+          @if (termUpdated()) {
+            <p class="form-warning" data-testid="term-updated">
+              O termo foi atualizado. Revise os dados e confirme novamente.
+            </p>
+          }
+
+          <div class="form-field">
+            <label for="invite-name">Nome</label>
+            <input
+              id="invite-name"
+              type="text"
+              autocomplete="name"
+              [value]="acceptForm().nome"
+              (input)="updateNome($event)"
+              data-testid="accept-name"
+            />
+            <small>Usado somente se sua conta ainda nao possuir um perfil de pessoa.</small>
+          </div>
+
+          <div class="form-field">
+            <label for="invite-cpf">CPF opcional</label>
+            <input
+              id="invite-cpf"
+              type="text"
+              inputmode="numeric"
+              autocomplete="off"
+              [value]="cpfValue()"
+              (input)="updateCpf($event)"
+              data-testid="accept-cpf"
+            />
+          </div>
+
+          <label class="confirm-row" for="invite-confirm">
+            <input
+              id="invite-confirm"
+              type="checkbox"
+              [checked]="acceptForm().termoConfirmado"
+              (change)="updateTermoConfirmado($event)"
+              data-testid="accept-confirm"
+            />
+            <span>Li e autorizo o compartilhamento dos dados indicados com esta empresa.</span>
+          </label>
+
+          @if (acceptValidationErrors().length > 0) {
+            <div class="form-errors" data-testid="accept-errors">
+              @for (error of acceptValidationErrors(); track error) {
+                <p>{{ error }}</p>
+              }
+            </div>
+          }
+
+          @if (acceptTemporaryError()) {
+            <p class="form-errors" data-testid="accept-temporary-error">{{ acceptTemporaryError() }}</p>
+          }
+
+          <div class="action-row">
+            <button
+              type="button"
+              [disabled]="!canSubmitClientAccept()"
+              (click)="aceitarCliente()"
+              data-testid="accept-client-button"
+            >
+              {{ accepting() ? 'Aceitando...' : 'Aceitar convite' }}
+            </button>
+            <button type="button" class="secondary-button" (click)="logoutPermanent()">Sair</button>
+          </div>
+        </section>
+      } @else if (showAuthActions()) {
+        <section class="action-panel" data-testid="pending-actions">
+          <p>Para continuar, sera necessario entrar ou criar uma conta.</p>
+          <div>
+            <button type="button" (click)="goToLogin()">Entrar</button>
+            <button type="button" (click)="goToRegister()">Criar conta</button>
+          </div>
+        </section>
+      } @else if (showAuthenticatedActions()) {
+        <section class="action-panel" data-testid="authenticated-actions">
+          <p>Este tipo de convite ainda nao possui aceite disponivel aqui.</p>
+          <div>
+            <button type="button" class="secondary-button" (click)="logoutPermanent()">Sair</button>
+          </div>
+        </section>
+      } @else {
+        <section class="terminal-panel" data-testid="terminal-message">
+          <p>Nenhuma acao esta disponivel para este status.</p>
+        </section>
+      }
+    } @else {
+      <div class="state-block" data-testid="error-state">
+        <h2>{{ pageTitle() }}</h2>
+        <p>{{ pageMessage() }}</p>
+      </div>
+    }
+  </section>
+</main>

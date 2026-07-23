@@ -7,7 +7,12 @@ export interface ApiEndpointsConfig {
   professionals: string;
   availableSlots: string;
   visitorUser: string;
+  login: string;
+  user: string;
   booking: string;
+  publicInvite: (token: string) => string;
+  acceptClientInvite: (token: string) => string;
+  acceptProviderInvite: (token: string) => string;
 }
 
 export interface ApiConfig {
@@ -28,7 +33,12 @@ export const apiConfig: ApiConfig = {
     professionals: '/prestador/list-prestador',
     availableSlots: '/horariodisponivel',
     visitorUser: '/usuariovisitante',
+    login: '/login',
+    user: '/usuario',
     booking: '/agendamento',
+    publicInvite: (token) => `/convites/public/${encodeURIComponent(token)}`,
+    acceptClientInvite: (token) => `/convites/public/${encodeURIComponent(token)}/aceitar-cliente`,
+    acceptProviderInvite: (token) => `/convites/public/${encodeURIComponent(token)}/aceitar-prestador`,
   },
 };
 

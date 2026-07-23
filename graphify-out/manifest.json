@@ -1,0 +1,357 @@
+{
+  ".vscode/extensions.json": {
+    "mtime": 1781825601.9670792,
+    "ast_hash": "66fd9e60d4633b6099fe02e06a7075ea",
+    "semantic_hash": ""
+  },
+  ".vscode/launch.json": {
+    "mtime": 1781825601.9670792,
+    "ast_hash": "430386a2f03e9d559664c196344c121b",
+    "semantic_hash": ""
+  },
+  ".vscode/tasks.json": {
+    "mtime": 1781825601.9680784,
+    "ast_hash": "cb7ed9a56930402d9059ea5a9773d60e",
+    "semantic_hash": ""
+  },
+  "angular.json": {
+    "mtime": 1781825923.8633406,
+    "ast_hash": "07ddb271b4b94044a496b369cc17b724",
+    "semantic_hash": ""
+  },
+  "docs/swagger.json": {
+    "mtime": 1783474617.8431647,
+    "ast_hash": "3ba1fb70cbfa80dab2688bb508688b40",
+    "semantic_hash": ""
+  },
+  "package.json": {
+    "mtime": 1781826457.6086936,
+    "ast_hash": "645ec6c0d28d6803cec1157d1965a686",
+    "semantic_hash": ""
+  },
+  "src/app/app.config.server.ts": {
+    "mtime": 1781825601.9760923,
+    "ast_hash": "f7b5c12b0dacd6692ee6042eb44f788b",
+    "semantic_hash": ""
+  },
+  "src/app/app.config.ts": {
+    "mtime": 1784308564.3873925,
+    "ast_hash": "d6c33e0fa7a3c7f129f58c1ea1db0d1b",
+    "semantic_hash": ""
+  },
+  "src/app/app.routes.server.ts": {
+    "mtime": 1784315669.0307934,
+    "ast_hash": "732d303be21e42899881ab6af2980f99",
+    "semantic_hash": ""
+  },
+  "src/app/app.routes.ts": {
+    "mtime": 1784315659.7110994,
+    "ast_hash": "5ee2baaca90bd5f7e18639a3709ae865",
+    "semantic_hash": ""
+  },
+  "src/app/app.spec.ts": {
+    "mtime": 1784308971.062951,
+    "ast_hash": "09e07b3ac035eaf371a21ff6408c29f4",
+    "semantic_hash": ""
+  },
+  "src/app/app.ts": {
+    "mtime": 1781825601.9730742,
+    "ast_hash": "7c2d0d06d95062562c5bcf2ed9f02ec5",
+    "semantic_hash": ""
+  },
+  "src/app/core/api/api.config.ts": {
+    "mtime": 1784741502.4886346,
+    "ast_hash": "4691d1115e154a30c62aaa67de27293a",
+    "semantic_hash": ""
+  },
+  "src/app/core/auth/auth-context.interceptor.spec.ts": {
+    "mtime": 1784750700.360935,
+    "ast_hash": "a03e65ba677240af183586eb7fcebdfa",
+    "semantic_hash": ""
+  },
+  "src/app/core/auth/auth-context.interceptor.ts": {
+    "mtime": 1784748908.182972,
+    "ast_hash": "7a263433d054b2ca5e862287ff0f6959",
+    "semantic_hash": ""
+  },
+  "src/app/core/auth/auth-context.ts": {
+    "mtime": 1784308513.3565023,
+    "ast_hash": "415d8da31a1607f0541a0b5632ee3e02",
+    "semantic_hash": ""
+  },
+  "src/app/core/auth/auth-return-url.service.spec.ts": {
+    "mtime": 1784750700.3624394,
+    "ast_hash": "6528393d79177d2b63cd1d38ebed1697",
+    "semantic_hash": ""
+  },
+  "src/app/core/auth/auth-return-url.service.ts": {
+    "mtime": 1784748908.183972,
+    "ast_hash": "f4f4447aec1239c4bb7a857820a5c913",
+    "semantic_hash": ""
+  },
+  "src/app/core/auth/permanent-auth.service.spec.ts": {
+    "mtime": 1784746677.4421322,
+    "ast_hash": "da83b6867b88eb642aa04cdee85a7106",
+    "semantic_hash": ""
+  },
+  "src/app/core/auth/permanent-auth.service.ts": {
+    "mtime": 1784308564.389392,
+    "ast_hash": "fa9c5cf5b3b935908cb7aa0b96aaec79",
+    "semantic_hash": ""
+  },
+  "src/app/core/auth/visitor-auth.interceptor.ts": {
+    "mtime": 1784308685.697467,
+    "ast_hash": "613185c521838a072e867b01901b36b8",
+    "semantic_hash": ""
+  },
+  "src/app/features/booking/components/booking-cliente-step/booking-cliente-step.component.ts": {
+    "mtime": 1783476154.7462733,
+    "ast_hash": "2e0c9ecae3c33c78e9a9fbb2392c76aa",
+    "semantic_hash": ""
+  },
+  "src/app/features/booking/components/booking-confirmacao-step/booking-confirmacao-step.component.ts": {
+    "mtime": 1783476405.1859167,
+    "ast_hash": "cbf30ebacf7a84a5624d4c4f028c6ebc",
+    "semantic_hash": ""
+  },
+  "src/app/features/booking/components/booking-data-horario-step/booking-data-horario-step.component.ts": {
+    "mtime": 1783476220.0326667,
+    "ast_hash": "2915cb56a4b34524eb285d9cc81576b9",
+    "semantic_hash": ""
+  },
+  "src/app/features/booking/components/booking-footer-actions/booking-footer-actions.component.ts": {
+    "mtime": 1783476363.5488756,
+    "ast_hash": "0c989def48757ccb59cd2d491cfc09cd",
+    "semantic_hash": ""
+  },
+  "src/app/features/booking/components/booking-layout/booking-layout.component.ts": {
+    "mtime": 1783476706.7243242,
+    "ast_hash": "da3e75b8bb4e2285e727efa72c6a0145",
+    "semantic_hash": ""
+  },
+  "src/app/features/booking/components/booking-profissional-step/booking-profissional-step.component.ts": {
+    "mtime": 1783801762.906775,
+    "ast_hash": "70baa5f2fa704966d6977535c5891fd2",
+    "semantic_hash": ""
+  },
+  "src/app/features/booking/components/booking-servico-step/booking-servico-step.component.ts": {
+    "mtime": 1783476402.6481168,
+    "ast_hash": "09aeacb9d5a311168229c5bced86087d",
+    "semantic_hash": ""
+  },
+  "src/app/features/booking/components/booking-stepper/booking-stepper.component.ts": {
+    "mtime": 1783476145.0010781,
+    "ast_hash": "6921a84f12051d24d55a9fb766baee2e",
+    "semantic_hash": ""
+  },
+  "src/app/features/booking/components/booking-sucesso-step/booking-sucesso-step.component.ts": {
+    "mtime": 1783476408.4398685,
+    "ast_hash": "853a20e62b91a8b7bebb3d47e1854cd2",
+    "semantic_hash": ""
+  },
+  "src/app/features/booking/models/booking.models.ts": {
+    "mtime": 1783801718.0813096,
+    "ast_hash": "4a9391ff0656abd04cd777b37846e33c",
+    "semantic_hash": ""
+  },
+  "src/app/features/booking/pages/booking-shell/booking-shell.page.ts": {
+    "mtime": 1783801734.8997688,
+    "ast_hash": "6a0e06419d86d25b50f76c3857b34e1a",
+    "semantic_hash": ""
+  },
+  "src/app/features/booking/services/booking-api.service.spec.ts": {
+    "mtime": 1784746677.4466548,
+    "ast_hash": "11ca6a9341a2a5b0f4ccb61d7b76ca31",
+    "semantic_hash": ""
+  },
+  "src/app/features/booking/services/booking-api.service.ts": {
+    "mtime": 1784308564.3883908,
+    "ast_hash": "fbd665a3a28db0637be86c2436990e80",
+    "semantic_hash": ""
+  },
+  "src/app/features/booking/services/booking-theme.service.ts": {
+    "mtime": 1784308564.389392,
+    "ast_hash": "6b1d116c0e177f8116c5b267dce304d4",
+    "semantic_hash": ""
+  },
+  "src/app/features/booking/store/booking.store.ts": {
+    "mtime": 1782273639.8996625,
+    "ast_hash": "74558d4b685f3ab13eb55c71d7f19116",
+    "semantic_hash": ""
+  },
+  "src/main.server.ts": {
+    "mtime": 1781825601.9710944,
+    "ast_hash": "9ecb37b66d871903d853e186f8b37698",
+    "semantic_hash": ""
+  },
+  "src/main.ts": {
+    "mtime": 1781825601.969076,
+    "ast_hash": "1289536d6d8f94242a4ffc598d094633",
+    "semantic_hash": ""
+  },
+  "src/server.ts": {
+    "mtime": 1781825601.972075,
+    "ast_hash": "fa889eb66db5f87778d773923c760b95",
+    "semantic_hash": ""
+  },
+  "tsconfig.app.json": {
+    "mtime": 1781825601.964564,
+    "ast_hash": "866b5976b8ccf7ba16fd861f343851a8",
+    "semantic_hash": ""
+  },
+  "tsconfig.json": {
+    "mtime": 1781825601.9635644,
+    "ast_hash": "53bc94dc8fdca030fe291132353484a9",
+    "semantic_hash": ""
+  },
+  "tsconfig.spec.json": {
+    "mtime": 1781825601.964564,
+    "ast_hash": "bd7d8d4dcf7261c37c6a35a892af2f35",
+    "semantic_hash": ""
+  },
+  "AGENTS.md": {
+    "mtime": 1781829639.3259718,
+    "ast_hash": "63b3333b95264aeb24e2fec3f0b6fae2",
+    "semantic_hash": ""
+  },
+  "README.md": {
+    "mtime": 1783803359.6822715,
+    "ast_hash": "524ebaab7adf6d0008f3f1ae6be65224",
+    "semantic_hash": ""
+  },
+  "docs/api/autenticacao.md": {
+    "mtime": 1781829460.8556223,
+    "ast_hash": "3537b7afac4d079412c8bc3801d14ca7",
+    "semantic_hash": ""
+  },
+  "docs/api/horarios.md": {
+    "mtime": 1781829495.746518,
+    "ast_hash": "86505f58c846ac634b11d515a5bc4f88",
+    "semantic_hash": ""
+  },
+  "docs/api/servicos.md": {
+    "mtime": 1781829479.0859735,
+    "ast_hash": "33bea72282c36785e3fa61a8aa16966b",
+    "semantic_hash": ""
+  },
+  "docs/arquitetura.md": {
+    "mtime": 1781829283.7032561,
+    "ast_hash": "bf4b9ae1c2f89ab6acfb47e96a702ecc",
+    "semantic_hash": ""
+  },
+  "docs/arquitetura/fluxo-booking.md": {
+    "mtime": 1781829417.2140565,
+    "ast_hash": "3537b7afac4d079412c8bc3801d14ca7",
+    "semantic_hash": ""
+  },
+  "docs/arquitetura/frontend.md": {
+    "mtime": 1781829400.4688404,
+    "ast_hash": "9f926b8552235f211f41587a032c8f5a",
+    "semantic_hash": ""
+  },
+  "docs/prompts/arquitetura.txt": {
+    "mtime": 1781829569.8569133,
+    "ast_hash": "e329ae38f94754d4b713365842d9b4d0",
+    "semantic_hash": ""
+  },
+  "docs/prompts/fluxo-booking.txt": {
+    "mtime": 1781829590.5808806,
+    "ast_hash": "8cdf05309475dc6000385c87298b377c",
+    "semantic_hash": ""
+  },
+  "src/app/app.html": {
+    "mtime": 1782261706.973659,
+    "ast_hash": "eb2ce819db0e019d9b8afee11e3b5828",
+    "semantic_hash": ""
+  },
+  "src/app/features/booking/pages/booking-shell/booking-shell.page.html": {
+    "mtime": 1783476699.9387853,
+    "ast_hash": "57e0196dae2baab669f456b2cfc83d32",
+    "semantic_hash": ""
+  },
+  "src/index.html": {
+    "mtime": 1781825601.9700832,
+    "ast_hash": "04faae824b00b0a821238a9c6a77385f",
+    "semantic_hash": ""
+  },
+  "src/app/features/convites-publicos/models/public-convite.models.ts": {
+    "mtime": 1784741582.1293976,
+    "ast_hash": "7bdc4c58845893cd1d72d1e15def6732",
+    "semantic_hash": ""
+  },
+  "src/app/features/convites-publicos/pages/public-convite-page/public-convite.page.spec.ts": {
+    "mtime": 1784746435.0230885,
+    "ast_hash": "e2c63ab39ae2bebdd96b8cc9ec96181e",
+    "semantic_hash": ""
+  },
+  "src/app/features/convites-publicos/pages/public-convite-page/public-convite.page.ts": {
+    "mtime": 1784742299.7493126,
+    "ast_hash": "8e1871bfc4b8559ad6e44b7a8f9829fa",
+    "semantic_hash": ""
+  },
+  "src/app/features/convites-publicos/services/public-convite.service.spec.ts": {
+    "mtime": 1784743711.4984083,
+    "ast_hash": "f6c4526b2bcf1bfe5c8ee4f1a3a38888",
+    "semantic_hash": ""
+  },
+  "src/app/features/convites-publicos/services/public-convite.service.ts": {
+    "mtime": 1784741600.4548566,
+    "ast_hash": "b89042c707beb6f194e13a1bfb603de7",
+    "semantic_hash": ""
+  },
+  "src/app/features/convites-publicos/store/public-convite.store.spec.ts": {
+    "mtime": 1784751875.1735528,
+    "ast_hash": "6c4c187c1cea31bbe74e5a6e3643bd92",
+    "semantic_hash": ""
+  },
+  "src/app/features/convites-publicos/store/public-convite.store.ts": {
+    "mtime": 1784750222.279679,
+    "ast_hash": "6b303e43506101a8b6d02620fe4059ac",
+    "semantic_hash": ""
+  },
+  "src/app/features/convites-publicos/utils/public-convite-formatters.ts": {
+    "mtime": 1784726597.1858277,
+    "ast_hash": "8537714933542a40f87ab2250539f604",
+    "semantic_hash": ""
+  },
+  "src/app/features/convites-publicos/pages/public-convite-page/public-convite.page.html": {
+    "mtime": 1784742424.2281823,
+    "ast_hash": "1cab3515607067d7a5d59b9505c04032",
+    "semantic_hash": ""
+  },
+  "src/app/features/auth-publica/pages/login-page/login.page.spec.ts": {
+    "mtime": 1784746677.445654,
+    "ast_hash": "87480790f06462ae07f10ff628ad2def",
+    "semantic_hash": ""
+  },
+  "src/app/features/auth-publica/pages/login-page/login.page.ts": {
+    "mtime": 1784750510.5866005,
+    "ast_hash": "993922f14f6374f16df9d1ed34585915",
+    "semantic_hash": ""
+  },
+  "src/app/features/auth-publica/pages/register-page/register.page.spec.ts": {
+    "mtime": 1784746677.4431388,
+    "ast_hash": "d1a3bcaeec6437bb41b9e47c380240a5",
+    "semantic_hash": ""
+  },
+  "src/app/features/auth-publica/pages/register-page/register.page.ts": {
+    "mtime": 1784750523.215743,
+    "ast_hash": "d9ddebc5ba26ddf1f58d20b7e6898bbc",
+    "semantic_hash": ""
+  },
+  "src/app/features/auth-publica/utils/public-auth-utils.ts": {
+    "mtime": 1784316306.0008335,
+    "ast_hash": "d80a95cb2ef9befa97f3e43eb890f105",
+    "semantic_hash": ""
+  },
+  "src/app/features/auth-publica/pages/login-page/login.page.html": {
+    "mtime": 1784314840.7696354,
+    "ast_hash": "384d25a63f7c4ba7c64f5c8684001a49",
+    "semantic_hash": ""
+  },
+  "src/app/features/auth-publica/pages/register-page/register.page.html": {
+    "mtime": 1784314883.686923,
+    "ast_hash": "d3c776e9a895fb4af148950372d47f4d",
+    "semantic_hash": ""
+  }
+}

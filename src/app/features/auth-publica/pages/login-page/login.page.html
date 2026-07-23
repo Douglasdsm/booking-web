@@ -1,0 +1,38 @@
+<main class="auth-shell">
+  <section class="auth-card">
+    <p class="eyebrow">Conta</p>
+    <h1>Entrar</h1>
+    <p class="subtitle">Use sua conta permanente para continuar o convite.</p>
+
+    @if (error()) {
+      <div class="error-message" data-testid="login-error">{{ error() }}</div>
+    }
+
+    <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+      <label>
+        <span>Usuario ou e-mail</span>
+        <input type="text" formControlName="user" autocomplete="username" />
+        @if (form.controls.user.touched && form.controls.user.invalid) {
+          <small>Informe seu usuario.</small>
+        }
+      </label>
+
+      <label>
+        <span>Senha</span>
+        <input type="password" formControlName="senha" autocomplete="current-password" />
+        @if (form.controls.senha.touched && form.controls.senha.invalid) {
+          <small>Informe sua senha.</small>
+        }
+      </label>
+
+      <button type="submit" [disabled]="submitting()">
+        {{ submitting() ? 'Entrando...' : 'Entrar' }}
+      </button>
+    </form>
+
+    <p class="switch-link">
+      Ainda nao tem conta?
+      <a [routerLink]="registerCommands()" [queryParams]="registerQueryParams()">Criar conta</a>
+    </p>
+  </section>
+</main>

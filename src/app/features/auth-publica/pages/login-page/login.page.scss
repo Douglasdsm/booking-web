@@ -1,0 +1,100 @@
+:host {
+  display: block;
+  min-height: 100dvh;
+  background: var(--booking-background, #ffffff);
+  color: var(--booking-text, #111827);
+}
+
+.auth-shell {
+  display: grid;
+  min-height: 100dvh;
+  place-items: center;
+  padding: 24px 16px;
+}
+
+.auth-card {
+  display: grid;
+  gap: 16px;
+  width: min(100%, 420px);
+  border: 1px solid var(--booking-border, #d1d5db);
+  border-radius: 16px;
+  padding: 20px;
+  background: var(--booking-card, #ffffff);
+}
+
+.eyebrow {
+  margin: 0;
+  color: color-mix(in srgb, var(--booking-text, #111827) 64%, transparent);
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+h1,
+p {
+  margin: 0;
+}
+
+h1 {
+  color: var(--booking-primary, #002b5c);
+  font-size: 1.7rem;
+}
+
+.subtitle,
+.switch-link {
+  color: color-mix(in srgb, var(--booking-text, #111827) 72%, transparent);
+  line-height: 1.45;
+}
+
+form {
+  display: grid;
+  gap: 14px;
+}
+
+label {
+  display: grid;
+  gap: 7px;
+  font-weight: 800;
+}
+
+input {
+  min-height: 46px;
+  border: 1px solid var(--booking-border, #d1d5db);
+  border-radius: 12px;
+  padding: 0 12px;
+  background: var(--booking-input, #ffffff);
+  color: var(--booking-input-text, #111827);
+  font: inherit;
+}
+
+small,
+.error-message {
+  color: var(--booking-error, #dc2626);
+}
+
+.error-message {
+  border: 1px solid color-mix(in srgb, var(--booking-error, #dc2626) 30%, transparent);
+  border-radius: 12px;
+  padding: 10px;
+  background: color-mix(in srgb, var(--booking-error, #dc2626) 8%, transparent);
+  font-weight: 700;
+}
+
+button {
+  min-height: 48px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--booking-button, #002b5c);
+  color: var(--booking-button-text, #ffffff);
+  font: inherit;
+  font-weight: 900;
+}
+
+button:disabled {
+  opacity: 0.62;
+}
+
+a {
+  color: var(--booking-primary, #002b5c);
+  font-weight: 900;
+}

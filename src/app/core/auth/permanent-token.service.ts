@@ -1,10 +1,10 @@
 import { isPlatformBrowser } from '@angular/common';
 import { computed, inject, Injectable, PLATFORM_ID, signal } from '@angular/core';
 
-const VISITOR_TOKEN_KEY = 'booking.visitor.accessToken';
+const PERMANENT_TOKEN_KEY = 'booking.user.accessToken';
 
 @Injectable({ providedIn: 'root' })
-export class VisitorTokenService {
+export class PermanentTokenService {
   private readonly platformId = inject(PLATFORM_ID);
   private readonly isBrowser = isPlatformBrowser(this.platformId);
   private readonly tokenSignal = signal<string | null>(this.readStoredToken());
@@ -22,11 +22,11 @@ export class VisitorTokenService {
     }
 
     if (normalizedToken) {
-      localStorage.setItem(VISITOR_TOKEN_KEY, normalizedToken);
+      localStorage.setItem(PERMANENT_TOKEN_KEY, normalizedToken);
       return;
     }
 
-    localStorage.removeItem(VISITOR_TOKEN_KEY);
+    localStorage.removeItem(PERMANENT_TOKEN_KEY);
   }
 
   getToken(): string | null {
@@ -42,7 +42,7 @@ export class VisitorTokenService {
       return null;
     }
 
-    return this.normalizeToken(localStorage.getItem(VISITOR_TOKEN_KEY));
+    return this.normalizeToken(localStorage.getItem(PERMANENT_TOKEN_KEY));
   }
 
   private normalizeToken(token: string | null): string | null {

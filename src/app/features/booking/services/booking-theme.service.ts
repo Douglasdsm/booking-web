@@ -4,6 +4,7 @@ import { inject, Injectable } from '@angular/core';
 import { catchError, map, Observable, of, tap } from 'rxjs';
 
 import { API_CONFIG } from '../../../core/api/api.config';
+import { bookingAuthContext, BookingAuthContext } from '../../../core/auth/auth-context';
 import { BookingTheme, BookingThemeResponse } from '../models/booking.models';
 
 export const DEFAULT_BOOKING_THEME: BookingTheme = {
@@ -31,6 +32,7 @@ export class BookingThemeService {
   getPublicTheme(pessoaJuridicaId: number): Observable<BookingThemeResponse> {
     return this.http.get<BookingThemeResponse>(
       `${this.config.baseUrl}${this.config.endpoints.bookingTheme(pessoaJuridicaId)}`,
+      { context: bookingAuthContext(BookingAuthContext.Anonymous) },
     );
   }
 

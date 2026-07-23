@@ -4,13 +4,13 @@ import { provideRouter } from '@angular/router';
 
 import { routes } from './app.routes';
 import { provideClientHydration } from '@angular/platform-browser';
-import { visitorAuthInterceptor } from './core/auth/visitor-auth.interceptor';
+import { authContextInterceptor } from './core/auth/auth-context.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
-    provideHttpClient(withFetch(), withInterceptors([visitorAuthInterceptor])),
+    provideHttpClient(withFetch(), withInterceptors([authContextInterceptor])),
     provideClientHydration()
   ]
 };
