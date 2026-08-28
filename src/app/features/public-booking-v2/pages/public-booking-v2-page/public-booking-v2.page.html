@@ -1,0 +1,158 @@
+<app-booking-layout>
+  <div class="booking-step" aria-live="polite">
+    @if (store.loadError() && !store.esusProfile()) {
+      <!-- Esus resolution / initial load failed before we even know if booking is enabled. -->
+      <div class="booking-title">
+        <h2>AGENDAMENTO ONLINE</h2>
+      </div>
+      <div class="booking-state booking-state--error" role="alert">{{ store.loadError()!.message }}</div>
+    } @else if (store.loading() && !store.esusProfile()) {
+      <div class="booking-state">Carregando...</div>
+    } @else if (store.esusProfile() && !store.publicBookingEnabled()) {
+      <!-- PublicBookingEnabled = false: no usable booking flow is rendered (plan §"PUBLIC ESUS"). -->
+      <div class="booking-title">
+        <h2>AGENDAMENTO ONLINE</h2>
+      </div>
+      <div class="booking-state">Agendamento online indisponível.</div>
+    } @else if (store.esusProfile()) {
+      @if (store.submitStatus() === 'success' && store.result()) {
+        @if (store.result()!.status === 'Confirmed') {
+          <section class="booking-success-card">
+            <span class="booking-success-card__icon" aria-hidden="true">✓</span>
+            <h2>AGENDAMENTO CONFIRMADO</h2>
+            <p>Seu horário foi reservado.</p>
+          </section>
+        } @else {
+          <section class="booking-success-card">
+            <span class="booking-success-card__icon" aria-hidden="true">⏳</span>
+            <h2>SOLICITAÇÃO ENVIADA</h2>
+            <p>Aguarde a confirmação do estabelecimento.</p>
+          </section>
+        }
+
+        <section class="booking-summary-card">
+          <h3>Resumo</h3>
+          <div class="booking-row">
+            <span>Serviço</span>
+            <strong>{{ store.result()!.serviceLabel }}</strong>
+          </div>
+          <div class="booking-row">
+            <span>Data e horário</span>
+            <strong>{{ formatSlotTime(store.result()!.startUtc) }}</strong>
+          </div>
+          <div class="booking-row booking-row--total">
+            <span>Valor</span>
+            <strong>{{ formatCurrency(store.result()!.price) }}</strong>
+          </div>
+        </section>
+
+        <button type="button" class="booking-button" (click)="startOver()">Novo agendamento</button>
+      } @else {
+        <div class="booking-title">
+          <h2>ESCOLHA O SERVIÇO</h2>
+          <p>Selecione um serviço para ver os horários disponíveis.</p>
+        </div>
+
+        @if (store.loading() && !store.serviceOffers().length) {
+          <div class="booking-state">Carregando serviços...</div>
+        } @else if (!store.serviceOffers().length) {
+          <div class="booking-state">Nenhum serviço disponível no momento.</div>
+        } @else {
+          <div class="booking-card-list" aria-label="Serviços disponíveis">
+            @for (service of store.serviceOffers(); track service.id) {
+              <button
+                type="button"
+                class="booking-select-card booking-select-card--service"
+                [class.booking-select-card--selected]="store.selectedServiceOffer()?.id === service.id"
+                [attr.aria-pressed]="store.selectedServiceOffer()?.id === service.id"
+                (click)="selectServiceOffer(service)"
+              >
+                <span class="booking-card-copy">
+                  <strong>{{ service.name }}</strong>
+                  @if (service.description) {
+                    <small>{{ service.description }}</small>
+                  }
+                  <span class="booking-service-meta">{{ service.baseDurationMinutes }} min</span>
+                </span>
+                <span class="booking-price">{{ formatCurrency(service.basePrice) }}</span>
+              </button>
+            }
+          </div>
+        }
+
+        @if (store.selectedServiceOffer()) {
+          <div class="booking-title">
+            <h2>ESCOLHA O HORÁRIO</h2>
+            <p>Horários sujeitos a confirmação — outra pessoa pode reservar antes de você.</p>
+          </div>
+
+          @if (store.loading()) {
+            <div class="booking-state">Carregando horários...</div>
+          } @else if (!store.availabilityItems().length) {
+            <div class="booking-state">Nenhum horário disponível nos próximos dias.</div>
+          } @else {
+            <div class="booking-slot-grid">
+              @for (slot of store.availabilityItems(); track slot.startUtc + '-' + slot.prestadorId) {
+                <button
+                  type="button"
+                  class="booking-slot"
+                  [class.booking-slot--selected]="store.selectedSlot() === slot"
+                  (click)="selectSlot(slot)"
+                >
+                  {{ formatSlotTime(slot.startUtc) }}
+                </button>
+              }
+            </div>
+          }
+        }
+
+        @if (store.selectedSlot()) {
+          <div class="booking-title">
+            <h2>SEUS DADOS</h2>
+            <p>Informe nome e telefone para reservar seu horário.</p>
+          </div>
+
+          <form class="booking-form" (submit)="$event.preventDefault(); submit()">
+            <label class="booking-field">
+              <span>Nome</span>
+              <input
+                type="text"
+                autocomplete="name"
+                placeholder="Digite seu nome"
+                required
+                [value]="store.visitorName()"
+                (input)="onNameInput($any($event.target).value)"
+              />
+            </label>
+
+            <label class="booking-field">
+              <span>Telefone</span>
+              <input
+                type="tel"
+                autocomplete="tel"
+                inputmode="tel"
+                placeholder="(00) 00000-0000"
+                required
+                [value]="store.visitorPhone()"
+                (input)="onPhoneInput($any($event.target).value)"
+              />
+            </label>
+          </form>
+
+          @if (store.submitStatus() === 'error' && store.submitError()) {
+            <div class="booking-state booking-state--error" role="alert">{{ store.submitError()!.message }}</div>
+          }
+
+          <button
+            type="button"
+            class="booking-button"
+            [disabled]="!canSubmit()"
+            (click)="submit()"
+          >
+            {{ store.submitStatus() === 'submitting' ? 'Verificando disponibilidade...' : 'Confirmar agendamento' }}
+          </button>
+        }
+      }
+    }
+  </div>
+</app-booking-layout>

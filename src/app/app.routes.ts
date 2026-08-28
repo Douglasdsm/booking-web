@@ -36,6 +36,18 @@ export const routes: Routes = [
     ],
   },
   {
+    // Phase 37: the minimal V2 public visitor booking client (plan
+    // docs/V2/PHASE-37-MINIMAL-BOOKING-CLIENT-V2-PILOT-READINESS-PLAN.md). Routed by EsusId directly,
+    // not slug — no safe slug->EsusId HTTP resolution exists yet (registered as a TECHNICAL_GAP in the
+    // Phase 37 report rather than invented). Deliberately no auth guard — the V2 flow has no
+    // account/token concept at all, the visitor is never authenticated.
+    path: 'agendar-v2/:esusId',
+    loadComponent: () =>
+      import('./features/public-booking-v2/pages/public-booking-v2-page/public-booking-v2.page').then(
+        (m) => m.PublicBookingV2Page,
+      ),
+  },
+  {
     path: '',
     pathMatch: 'full',
     redirectTo: 'agendar/demo',

@@ -22,6 +22,11 @@ export const serverRoutes: ServerRoute[] = [
     renderMode: RenderMode.Server
   },
   {
+    // Phase 37: dynamic EsusId param, same reasoning as 'agendar/:slug' above — never prerenderable.
+    path: 'agendar-v2/:esusId',
+    renderMode: RenderMode.Server
+  },
+  {
     path: '**',
     renderMode: RenderMode.Prerender
   }
