@@ -23,8 +23,24 @@ export interface ApiConfig {
 
 const swaggerUrl = 'http://168.231.66.108:8080/swagger/v1/swagger.json';
 
+/**
+ * Phase 38B: the API base URL is now configurable per environment at container runtime, not only at
+ * build time. `public/env-config.js` is a plain script loaded by `index.html` before this module ever
+ * runs, so `window.__env` (browser) is already populated by the time this file is evaluated. It ships
+ * checked in with an empty `apiBaseUrl` (see that file) — `ng serve`, unit tests, and any Docker image
+ * built without the Phase 38B entrypoint override all keep working exactly as before, falling back to
+ * the historical hardcoded origin below. Only when the deployment environment (Pilot/Staging/Production)
+ * explicitly supplies `API_BASE_URL` at container start (see `booking-web/Dockerfile` and
+ * `docs/V2/PILOT-CONFIGURATION-CONTRACT.md`) does this resolve to something else.
+ */
+function resolveApiBaseUrl(): string {
+  const runtimeEnv = (globalThis as { __env?: { apiBaseUrl?: string } }).__env;
+  const override = runtimeEnv?.apiBaseUrl?.trim();
+  return override ? override : new URL(swaggerUrl).origin;
+}
+
 export const apiConfig: ApiConfig = {
-  baseUrl: new URL(swaggerUrl).origin,
+  baseUrl: resolveApiBaseUrl(),
   swaggerUrl,
   endpoints: {
     bookingConfig: (slug) => `/booking/config/${slug}`,

@@ -6,6 +6,9 @@
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <!-- Phase 38B: plain (non-module) script, so it executes before Angular's deferred module bundle,
+       synchronously populating window.__env for src/app/core/api/api.config.ts to read. -->
+  <script src="env-config.js"></script>
 </head>
 <body>
   <app-root></app-root>

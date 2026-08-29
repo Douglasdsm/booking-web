@@ -36,6 +36,21 @@ RUN cp \
     /usr/share/nginx/html/index.html \
     && test -f /usr/share/nginx/html/index.html
 
+# Phase 38B: per-environment runtime API base URL. `env-config.js` ships baked in with an empty
+# apiBaseUrl (safe default — api.config.ts falls back to its historical hardcoded origin whenever it's
+# empty). This template + entrypoint script only overwrite it when the container is actually started
+# with an API_BASE_URL env var — nginx:alpine's own docker-entrypoint.sh already runs every executable
+# script under /docker-entrypoint.d/ before starting nginx (confirmed by this same image's own startup
+# log, "Configuration complete; ready for start up" — this is not a new/custom entrypoint mechanism,
+# just one more script dropped into the one the base image already provides), and envsubst is already
+# present in this base image (used by its own default templating feature).
+RUN printf 'window.__env = window.__env || {};\nwindow.__env.apiBaseUrl = "${API_BASE_URL}";\n' \
+    > /usr/share/nginx/html/env-config.template.js
+
+RUN printf '#!/bin/sh\nset -e\nif [ -n "$API_BASE_URL" ]; then\n  envsubst \x27$API_BASE_URL\x27 < /usr/share/nginx/html/env-config.template.js > /usr/share/nginx/html/env-config.js\nfi\n' \
+    > /docker-entrypoint.d/40-env-config.sh \
+    && chmod +x /docker-entrypoint.d/40-env-config.sh
+
 EXPOSE 80
 
 # Phase 38 (Pilot Infrastructure): container-level liveness signal for the deploy pipeline/orchestrator.
