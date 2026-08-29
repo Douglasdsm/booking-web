@@ -38,4 +38,13 @@ RUN cp \
 
 EXPOSE 80
 
+# Phase 38 (Pilot Infrastructure): container-level liveness signal for the deploy pipeline/orchestrator.
+# The SPA's index.html is served for any path (see nginx.conf's try_files fallback), so a plain GET / is
+# a real proof nginx is up and actually serving the built Angular app — not just that the process exists.
+# Uses 127.0.0.1 explicitly, not "localhost": this nginx only binds 0.0.0.0:80 (IPv4), and this image's
+# busybox wget resolves "localhost" to ::1 first — confirmed by a real failed HEALTHCHECK run against
+# "localhost" ("Connection refused" on the IPv6 loopback) before this fix.
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+    CMD wget -q -O /dev/null http://127.0.0.1/ || exit 1
+
 CMD ["nginx", "-g", "daemon off;"]
