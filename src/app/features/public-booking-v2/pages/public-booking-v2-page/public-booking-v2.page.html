@@ -15,6 +15,18 @@
       </div>
       <div class="booking-state">Agendamento online indisponível.</div>
     } @else if (store.esusProfile()) {
+      @if (store.publicStatus() && store.submitStatus() !== 'success') {
+        <section class="booking-success-card">
+          @if (store.publicStatus()!.status === 'Pending') {
+            <h2>SOLICITAÇÃO EM ANÁLISE</h2><p>O estabelecimento ainda precisa confirmar este pedido.</p>
+          } @else if (store.publicStatus()!.status === 'Accepted') {
+            <h2>AGENDAMENTO CONFIRMADO</h2><p>Seu pedido foi aceito pelo estabelecimento.</p>
+          } @else {
+            <h2>SOLICITAÇÃO RECUSADA</h2><p>Este pedido não foi aceito. Escolha outro horário.</p>
+          }
+          <button type="button" class="booking-button" (click)="refreshPublicStatus()">Atualizar status</button>
+        </section>
+      } @else {
       @if (store.submitStatus() === 'success' && store.result()) {
         @if (store.result()!.status === 'Confirmed') {
           <section class="booking-success-card">
@@ -155,6 +167,7 @@
             {{ store.submitStatus() === 'submitting' ? 'Verificando disponibilidade...' : 'Confirmar agendamento' }}
           </button>
         }
+      }
       }
     }
   </div>

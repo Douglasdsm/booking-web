@@ -114,6 +114,9 @@ export class PublicBookingV2Page {
       .subscribe({
         next: (result) => {
           this.idempotency.clear();
+          if (result.publicStatusToken) {
+            try { sessionStorage.setItem('public-booking-v2:status-token', result.publicStatusToken); } catch { /* SSR */ }
+          }
           this.store.setSubmitSuccess(result);
         },
         error: (error: HttpErrorResponse) => {
@@ -154,6 +157,10 @@ export class PublicBookingV2Page {
       .subscribe({
         next: (profile) => {
           this.store.setEsusProfile(profile);
+          try {
+            const token = sessionStorage.getItem('public-booking-v2:status-token');
+            if (token) this.refreshPublicStatus(esusId, token);
+          } catch { /* SSR */ }
 
           if (profile.publicBookingEnabled) {
             this.loadServiceOffers(esusId);
@@ -161,6 +168,15 @@ export class PublicBookingV2Page {
         },
         error: (error: HttpErrorResponse) => this.store.setLoadError(mapPublicBookingError(error)),
       });
+  }
+
+  protected refreshPublicStatus(esusId = this.store.esusId()!, token?: string): void {
+    const statusToken = token ?? (() => { try { return sessionStorage.getItem('public-booking-v2:status-token') ?? ''; } catch { return ''; } })();
+    if (!statusToken || !esusId) return;
+    this.api.getPublicBookingStatus(esusId, statusToken).subscribe({
+      next: (status) => this.store.setPublicStatus(status),
+      error: (error: HttpErrorResponse) => this.store.setSubmitError(mapPublicBookingError(error)),
+    });
   }
 
   private loadServiceOffers(esusId: number): void {

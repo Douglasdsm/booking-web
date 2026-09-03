@@ -6,6 +6,7 @@ import {
   AvailabilitySearchRequest,
   AvailabilitySearchResponse,
   PublicBookingSubmissionResult,
+  PublicBookingStatusResult,
   PublicEsusProfile,
   PublicServiceOfferListResponse,
   SubmitPublicBookingRequest,
@@ -28,6 +29,13 @@ export class PublicBookingV2ApiService {
     return this.http.get<PublicEsusProfile>(this.url(this.config.endpoints.publicEsus(esusId)), {
       context: new HttpContext(),
     });
+  }
+
+  getPublicBookingStatus(esusId: number, token: string) {
+    return this.http.get<PublicBookingStatusResult>(
+      `${this.config.baseUrl}/v2/public/esus/${esusId}/booking-status/${encodeURIComponent(token)}`,
+      { context: new HttpContext() },
+    );
   }
 
   getServiceOffers(esusId: number) {

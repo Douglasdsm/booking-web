@@ -4,6 +4,7 @@ import {
   BookingPreview,
   PublicBookingError,
   PublicBookingSubmissionResult,
+  PublicBookingStatusResult,
   PublicEsusProfile,
   PublicServiceOffer,
 } from '../models/public-booking-v2.models';
@@ -24,6 +25,7 @@ interface PublicBookingV2State {
   submitError: PublicBookingError | null;
   loading: boolean;
   loadError: PublicBookingError | null;
+  publicStatus: PublicBookingStatusResult | null;
 }
 
 const initialState: PublicBookingV2State = {
@@ -40,6 +42,7 @@ const initialState: PublicBookingV2State = {
   submitError: null,
   loading: false,
   loadError: null,
+  publicStatus: null,
 };
 
 /**
@@ -65,6 +68,7 @@ export class PublicBookingV2Store {
   readonly submitError = computed(() => this.state().submitError);
   readonly loading = computed(() => this.state().loading);
   readonly loadError = computed(() => this.state().loadError);
+  readonly publicStatus = computed(() => this.state().publicStatus);
 
   readonly publicBookingEnabled = computed(() => this.state().esusProfile?.publicBookingEnabled === true);
 
@@ -117,6 +121,8 @@ export class PublicBookingV2Store {
   setSubmitError(submitError: PublicBookingError): void {
     this.patch({ submitStatus: 'error', submitError });
   }
+
+  setPublicStatus(publicStatus: PublicBookingStatusResult): void { this.patch({ publicStatus }); }
 
   setLoading(loading: boolean): void {
     this.patch({ loading });

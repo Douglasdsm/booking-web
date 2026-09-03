@@ -49,6 +49,13 @@ export interface BookingPreview {
   currency: string;
 }
 
+export interface PublicBookingStatusResult {
+  status: 'Pending' | 'Accepted' | 'Rejected';
+  startUtc: string;
+  endUtc: string;
+  serviceLabel: string;
+}
+
 export interface AvailabilitySearchResponse {
   executionEsusId: number;
   serviceOfferId: number;
@@ -78,6 +85,7 @@ export interface PublicBookingSubmissionResult {
   endUtc: string;
   price: number;
   currency: string;
+  publicStatusToken?: string | null;
 }
 
 // ---- Error contract (API/Filters/GlobalExceptionHandler.cs → ResponseErrorJson) ----
