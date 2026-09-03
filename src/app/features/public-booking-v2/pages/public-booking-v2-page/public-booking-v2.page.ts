@@ -33,6 +33,7 @@ export class PublicBookingV2Page {
   private readonly route = inject(ActivatedRoute);
   private readonly api = inject(PublicBookingV2ApiService);
   private readonly idempotency = inject(IdempotencyKeyService);
+  private availabilityRequestVersion = 0;
 
   protected readonly store = inject(PublicBookingV2Store);
   protected readonly today = new Date();
@@ -42,7 +43,10 @@ export class PublicBookingV2Page {
       !!this.store.selectedServiceOffer() &&
       !!this.store.selectedSlot() &&
       this.store.visitorName().trim().length > 0 &&
-      this.store.visitorPhone().trim().length > 0 &&
+      this.store.visitorName().trim().length <= 120 &&
+      this.store.visitorPhone().trim().length >= 8 &&
+      this.store.visitorPhone().trim().length <= 32 &&
+      /^[0-9+() .-]+$/.test(this.store.visitorPhone().trim()) &&
       this.store.submitStatus() !== 'submitting',
   );
 
@@ -180,6 +184,7 @@ export class PublicBookingV2Page {
 
     this.store.setLoading(true);
     this.store.setLoadError(null);
+    const version = ++this.availabilityRequestVersion;
 
     const startDate = this.toDateOnly(this.today);
     const endDate = this.toDateOnly(this.addDays(this.today, AVAILABILITY_RANGE_DAYS));
@@ -188,8 +193,8 @@ export class PublicBookingV2Page {
       .searchAvailability(esusId, { serviceOfferId: serviceOffer.id, startDate, endDate })
       .pipe(finalize(() => this.store.setLoading(false)))
       .subscribe({
-        next: (response) => this.store.setAvailabilityItems(response.items ?? []),
-        error: (error: HttpErrorResponse) => this.store.setLoadError(mapPublicBookingError(error)),
+        next: (response) => { if (version === this.availabilityRequestVersion) this.store.setAvailabilityItems(response.items ?? []); },
+        error: (error: HttpErrorResponse) => { if (version === this.availabilityRequestVersion) this.store.setLoadError(mapPublicBookingError(error)); },
       });
   }
 
@@ -202,12 +207,13 @@ export class PublicBookingV2Page {
   }
 
   private toDateOnly(date: Date): string {
-    return date.toISOString().slice(0, 10);
+    const parts = new Intl.DateTimeFormat('en-CA', { timeZone: this.store.esusProfile()?.timeZoneId ?? 'UTC' }).formatToParts(date);
+    return `${parts.find((part) => part.type === 'year')?.value}-${parts.find((part) => part.type === 'month')?.value}-${parts.find((part) => part.type === 'day')?.value}`;
   }
 
   private addDays(date: Date, days: number): Date {
     const result = new Date(date);
-    result.setDate(result.getDate() + days);
+    result.setUTCDate(result.getUTCDate() + days);
     return result;
   }
 }

@@ -12,6 +12,7 @@ import { Injectable } from '@angular/core';
 @Injectable({ providedIn: 'root' })
 export class IdempotencyKeyService {
   private activeKey: string | null = null;
+  private readonly storageKey = 'public-booking-v2:attempt';
 
   /** Starts a brand-new logical attempt — call when the visitor's submittable intent changes
    * (service/slot/name/phone), never on a mere retry of the same attempt. */
@@ -22,20 +23,27 @@ export class IdempotencyKeyService {
 
   /** The key for the attempt currently in flight/retryable — generates one if none exists yet. */
   current(): string {
+    if (this.activeKey) return this.activeKey;
+    try { this.activeKey = sessionStorage.getItem(this.storageKey); } catch { /* SSR */ }
     return this.activeKey ?? this.next();
   }
 
   clear(): void {
     this.activeKey = null;
+    try { sessionStorage.removeItem(this.storageKey); } catch { /* SSR */ }
   }
 
   private generate(): string {
     if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
-      return crypto.randomUUID();
+      const key = crypto.randomUUID();
+      try { sessionStorage.setItem(this.storageKey, key); } catch { /* SSR */ }
+      return key;
     }
 
     // SSR/older-runtime fallback — still opaque, still unique enough for this purpose (never parsed by
     // the backend, only compared for equality within its own (Esus, phone, key) scope).
-    return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+    const key = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+    try { sessionStorage.setItem(this.storageKey, key); } catch { /* SSR */ }
+    return key;
   }
 }

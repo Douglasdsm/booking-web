@@ -9,6 +9,9 @@ export interface ApiEndpointsConfig {
   visitorUser: string;
   login: string;
   user: string;
+  publicUserRegister: string;
+  usernameStatus?: string;
+  defineUsername?: string;
   booking: string;
   publicInvite: (token: string) => string;
   acceptClientInvite: (token: string) => string;
@@ -21,7 +24,7 @@ export interface ApiConfig {
   endpoints: ApiEndpointsConfig;
 }
 
-const swaggerUrl = 'http://168.231.66.108:8080/swagger/v1/swagger.json';
+const swaggerUrl = 'https://168.231.66.108:8080/swagger/v1/swagger.json';
 
 /**
  * Phase 38B: the API base URL is now configurable per environment at container runtime, not only at
@@ -36,7 +39,8 @@ const swaggerUrl = 'http://168.231.66.108:8080/swagger/v1/swagger.json';
 function resolveApiBaseUrl(): string {
   const runtimeEnv = (globalThis as { __env?: { apiBaseUrl?: string } }).__env;
   const override = runtimeEnv?.apiBaseUrl?.trim();
-  return override ? override : new URL(swaggerUrl).origin;
+  if (override) return override;
+  return typeof window !== 'undefined' ? window.location.origin : 'https://localhost:8080';
 }
 
 export const apiConfig: ApiConfig = {
@@ -51,6 +55,9 @@ export const apiConfig: ApiConfig = {
     visitorUser: '/usuariovisitante',
     login: '/login',
     user: '/usuario',
+    publicUserRegister: '/usuario/public/register',
+    usernameStatus: '/usuario/username-status',
+    defineUsername: '/usuario/definir-username',
     booking: '/agendamento',
     publicInvite: (token) => `/convites/public/${encodeURIComponent(token)}`,
     acceptClientInvite: (token) => `/convites/public/${encodeURIComponent(token)}/aceitar-cliente`,

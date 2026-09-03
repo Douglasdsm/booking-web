@@ -120,6 +120,7 @@
                 autocomplete="name"
                 placeholder="Digite seu nome"
                 required
+                maxlength="120"
                 [value]="store.visitorName()"
                 (input)="onNameInput($any($event.target).value)"
               />
@@ -133,6 +134,8 @@
                 inputmode="tel"
                 placeholder="(00) 00000-0000"
                 required
+                maxlength="32"
+                pattern="[0-9+() .-]{8,32}"
                 [value]="store.visitorPhone()"
                 (input)="onPhoneInput($any($event.target).value)"
               />

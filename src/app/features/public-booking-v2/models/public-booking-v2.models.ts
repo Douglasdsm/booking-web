@@ -10,6 +10,7 @@ export interface PublicEsusProfile {
   esusId: number;
   tipo: string;
   publicBookingEnabled: boolean;
+  timeZoneId?: string | null;
 }
 
 // ---- GET /v2/public/esus/{esusId}/service-offers ----
