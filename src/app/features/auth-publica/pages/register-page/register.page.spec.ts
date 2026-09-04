@@ -22,6 +22,7 @@ const apiConfig: ApiConfig = {
     visitorUser: '/usuariovisitante',
     login: '/login',
     user: '/usuario',
+    publicUserRegister: '/usuario/public/register',
     booking: '/agendamento',
     publicInvite: (token) => `/convites/public/${token}`,
     acceptClientInvite: (token) => `/convites/public/${token}/aceitar-cliente`,
@@ -75,22 +76,24 @@ describe('RegisterPage', () => {
     visitorToken.setToken('visitor-token');
     permanentToken.setToken('old-user-token');
 
-    fillRegister({ senha: 'senha123', confirmarSenha: 'senha123' });
+    fillRegister({ senha: 'senha123', confirmacaoSenha: 'senha123' });
     submit();
     submit();
 
-    const request = httpMock.expectOne('https://api.test/usuario');
+    const request = httpMock.expectOne('https://api.test/usuario/public/register');
     expect(request.request.context.get(BOOKING_AUTH_CONTEXT)).toBe(BookingAuthContext.Anonymous);
     expect(request.request.headers.has('Authorization')).toBe(false);
     expect(request.request.body).toEqual({
+      username: 'joao.silva',
       nome: 'Joao Silva',
       email: 'joao@email.com',
-      phone: '65999999999',
-      cpfCnpj: '12345678909',
-      user: 'joao',
+      telefone: '65999999999',
       senha: 'senha123',
+      confirmacaoSenha: 'senha123',
+      aceitouTermos: true,
+      aceitouPoliticaPrivacidade: true,
     });
-    httpMock.expectNone('https://api.test/usuario');
+    httpMock.expectNone('https://api.test/usuario/public/register');
     request.flush({ id: 1, user: 'joao', tokens: { accessToken: 'new-user-token' } });
 
     expect(permanentToken.getToken()).toBe('new-user-token');
@@ -99,35 +102,57 @@ describe('RegisterPage', () => {
   });
 
   it('validates password confirmation without sending it to the backend', () => {
-    fillRegister({ senha: 'senha123', confirmarSenha: 'outra123' });
+    fillRegister({ senha: 'senha123', confirmacaoSenha: 'outra123' });
     submit();
     fixture.detectChanges();
 
-    expect(textContent()).toContain('As senhas informadas nao conferem.');
-    httpMock.expectNone('https://api.test/usuario');
+    expect(textContent()).toContain('As senhas informadas não conferem.');
+    httpMock.expectNone('https://api.test/usuario/public/register');
+  });
+
+  it('validates username before sending it to the backend', () => {
+    fillRegister({ username: 'joao@email.com' });
+    submit();
+    fixture.detectChanges();
+
+    expect(textContent()).toContain('Username nao pode ser um e-mail.');
+    httpMock.expectNone('https://api.test/usuario/public/register');
   });
 
   it('shows backend validation errors', () => {
-    fillRegister({ senha: 'senha123', confirmarSenha: 'senha123' });
+    fillRegister({ senha: 'senha123', confirmacaoSenha: 'senha123' });
     submit();
-    httpMock.expectOne('https://api.test/usuario').flush(
+    httpMock.expectOne('https://api.test/usuario/public/register').flush(
       { errors: ['E-mail ja cadastrado.'] },
-      { status: 400, statusText: 'Bad Request' },
+      { status: 409, statusText: 'Conflict' },
     );
     fixture.detectChanges();
 
     expect(textContent()).toContain('E-mail ja cadastrado.');
   });
 
+  it('requires terms acceptance', () => {
+    fillRegister({ aceitouTermos: false });
+    submit();
+
+    httpMock.expectNone('https://api.test/usuario/public/register');
+  });
+
+  it('renders the login link', () => {
+    expect(textContent()).toContain('Já possui uma conta?');
+    expect((fixture.nativeElement as HTMLElement).querySelector('a')?.getAttribute('href')).toContain('/entrar');
+  });
+
   function fillRegister(overrides: Partial<ReturnType<typeof fixture.componentInstance['form']['getRawValue']>>): void {
     fixture.componentInstance['form'].setValue({
+      username: 'Joao.Silva',
       nome: 'Joao Silva',
       email: 'joao@email.com',
-      phone: '(65) 99999-9999',
-      cpfCnpj: '123.456.789-09',
-      user: 'joao',
+      telefone: '(65) 99999-9999',
       senha: 'senha123',
-      confirmarSenha: 'senha123',
+      confirmacaoSenha: 'senha123',
+      aceitouTermos: true,
+      aceitouPoliticaPrivacidade: true,
       ...overrides,
     });
     fixture.detectChanges();

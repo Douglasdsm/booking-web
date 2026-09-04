@@ -1,47 +1,81 @@
 <main class="auth-shell">
   <section class="auth-card">
     <p class="eyebrow">Conta</p>
-    <h1>Criar conta</h1>
-    <p class="subtitle">Crie uma conta permanente para continuar o convite.</p>
+    <h1>Crie sua conta</h1>
+    <p class="subtitle">Cadastre uma conta permanente para entrar e continuar seus próximos agendamentos.</p>
 
     @if (error()) {
       <div class="error-message" data-testid="register-error">{{ error() }}</div>
     }
+    @if (success()) {
+      <div class="success-message" data-testid="register-success">Conta criada com sucesso.</div>
+    }
 
     <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
       <label>
-        <span>Nome</span>
+        <span>Username</span>
+        <input type="text" formControlName="username" autocomplete="username" autocapitalize="none" />
+        @if (form.controls.username.touched && form.controls.username.invalid) {
+          <small>{{ usernameErrorMessage() }}</small>
+        }
+      </label>
+
+      <label>
+        <span>Nome completo</span>
         <input type="text" formControlName="nome" autocomplete="name" />
+        @if (form.controls.nome.touched && form.controls.nome.invalid) {
+          <small>Informe seu nome completo.</small>
+        }
       </label>
 
       <label>
         <span>E-mail</span>
         <input type="email" formControlName="email" autocomplete="email" />
+        @if (form.controls.email.touched && form.controls.email.invalid) {
+          <small>Informe um e-mail válido.</small>
+        }
       </label>
 
       <label>
         <span>Telefone</span>
-        <input type="tel" formControlName="phone" autocomplete="tel" />
+        <input type="tel" formControlName="telefone" autocomplete="tel" inputmode="numeric" />
+        @if (form.controls.telefone.touched && form.controls.telefone.invalid) {
+          <small>Informe DDD e telefone com 10 ou 11 dígitos.</small>
+        }
       </label>
 
-      <label>
-        <span>CPF/CNPJ</span>
-        <input type="text" formControlName="cpfCnpj" inputmode="numeric" />
-      </label>
-
-      <label>
-        <span>Usuario</span>
-        <input type="text" formControlName="user" autocomplete="username" />
-      </label>
-
-      <label>
+      <label class="password-field">
         <span>Senha</span>
-        <input type="password" formControlName="senha" autocomplete="new-password" />
+        <span class="password-control">
+          <input [type]="showPassword() ? 'text' : 'password'" formControlName="senha" autocomplete="new-password" />
+          <button type="button" class="ghost-button" (click)="togglePasswordVisibility()">
+            {{ showPassword() ? 'Ocultar' : 'Mostrar' }}
+          </button>
+        </span>
+        <small [class.valid-requirement]="passwordHasMinimumLength()">Mínimo de 6 caracteres.</small>
       </label>
 
-      <label>
-        <span>Confirmar senha</span>
-        <input type="password" formControlName="confirmarSenha" autocomplete="new-password" />
+      <label class="password-field">
+        <span>Confirmação da senha</span>
+        <span class="password-control">
+          <input [type]="showPasswordConfirmation() ? 'text' : 'password'" formControlName="confirmacaoSenha" autocomplete="new-password" />
+          <button type="button" class="ghost-button" (click)="togglePasswordConfirmationVisibility()">
+            {{ showPasswordConfirmation() ? 'Ocultar' : 'Mostrar' }}
+          </button>
+        </span>
+        @if (form.controls.confirmacaoSenha.touched && form.controls.confirmacaoSenha.invalid) {
+          <small>As senhas informadas não conferem.</small>
+        }
+      </label>
+
+      <label class="checkbox-field">
+        <input type="checkbox" formControlName="aceitouTermos" />
+        <span>Aceito os termos de uso.</span>
+      </label>
+
+      <label class="checkbox-field">
+        <input type="checkbox" formControlName="aceitouPoliticaPrivacidade" />
+        <span>Aceito a política de privacidade.</span>
       </label>
 
       <button type="submit" [disabled]="submitting()">
@@ -50,7 +84,7 @@
     </form>
 
     <p class="switch-link">
-      Ja tem conta?
+      Já possui uma conta?
       <a [routerLink]="loginCommands()" [queryParams]="loginQueryParams()">Entrar</a>
     </p>
   </section>

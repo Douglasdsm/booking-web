@@ -6,6 +6,14 @@ export const serverRoutes: ServerRoute[] = [
     renderMode: RenderMode.Server
   },
   {
+    path: 'cadastrar',
+    renderMode: RenderMode.Server
+  },
+  {
+    path: 'definir-username',
+    renderMode: RenderMode.Server
+  },
+  {
     path: 'criar-conta',
     renderMode: RenderMode.Server
   },

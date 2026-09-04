@@ -164,7 +164,7 @@ export class PublicConvitePage {
   }
 
   protected goToRegister(): void {
-    this.navigateToAuth('/criar-conta');
+    this.navigateToAuth('/cadastrar');
   }
 
   protected logoutPermanent(): void {
@@ -192,7 +192,7 @@ export class PublicConvitePage {
     this.store.aceitarPrestador();
   }
 
-  private navigateToAuth(path: '/entrar' | '/criar-conta'): void {
+  private navigateToAuth(path: '/entrar' | '/cadastrar'): void {
     const returnUrl = this.authReturnUrl.normalizeReturnUrl(this.router.url.split('?')[0]);
 
     if (returnUrl) {

@@ -10,10 +10,10 @@
 
     <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
       <label>
-        <span>Usuario ou e-mail</span>
+        <span>Username</span>
         <input type="text" formControlName="user" autocomplete="username" />
         @if (form.controls.user.touched && form.controls.user.invalid) {
-          <small>Informe seu usuario.</small>
+          <small>Informe seu username.</small>
         }
       </label>
 
@@ -31,8 +31,8 @@
     </form>
 
     <p class="switch-link">
-      Ainda nao tem conta?
-      <a [routerLink]="registerCommands()" [queryParams]="registerQueryParams()">Criar conta</a>
+      Ainda não possui uma conta?
+      <a [routerLink]="registerCommands()" [queryParams]="registerQueryParams()">Cadastre-se</a>
     </p>
   </section>
 </main>

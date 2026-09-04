@@ -1,5 +1,5 @@
 import { Component, computed, inject, signal } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 
@@ -12,6 +12,11 @@ import {
   onlyDigits,
   resolveInitialReturnUrl,
 } from '../../utils/public-auth-utils';
+import {
+  normalizeUsername,
+  usernameValidationMessage,
+  usernameValidator,
+} from '../../utils/username-validator';
 
 @Component({
   selector: 'app-register-page',
@@ -20,6 +25,8 @@ import {
   styleUrl: '../login-page/login.page.scss',
 })
 export class RegisterPage {
+  private static readonly phoneRegex = /^\d{2}\d{4,5}\d{4}$/;
+
   private readonly fb = inject(FormBuilder);
   private readonly auth = inject(PermanentAuthService);
   private readonly returnUrlService = inject(AuthReturnUrlService);
@@ -36,15 +43,19 @@ export class RegisterPage {
   protected readonly loginQueryParams = computed(() =>
     this.returnUrl() ? { returnUrl: this.returnUrl() } : null,
   );
+  protected readonly showPassword = signal(false);
+  protected readonly showPasswordConfirmation = signal(false);
+  protected readonly success = signal(false);
 
   protected readonly form = this.fb.nonNullable.group({
-    nome: ['', [Validators.required]],
+    username: ['', [usernameValidator]],
+    nome: ['', [Validators.required, Validators.maxLength(255), RegisterPage.notBlank]],
     email: ['', [Validators.required, Validators.email]],
-    phone: ['', [Validators.required]],
-    cpfCnpj: [''],
-    user: ['', [Validators.required]],
+    telefone: ['', [Validators.required, RegisterPage.phone]],
     senha: ['', [Validators.required, Validators.minLength(6)]],
-    confirmarSenha: ['', [Validators.required]],
+    confirmacaoSenha: ['', [Validators.required]],
+    aceitouTermos: [false, [Validators.requiredTrue]],
+    aceitouPoliticaPrivacidade: [false, [Validators.requiredTrue]],
   });
 
   constructor() {
@@ -58,13 +69,14 @@ export class RegisterPage {
       return;
     }
 
-    if (this.form.invalid || this.form.controls.senha.value !== this.form.controls.confirmarSenha.value) {
+    this.normalizeSafeFields();
+
+    if (this.form.controls.senha.value !== this.form.controls.confirmacaoSenha.value) {
+      this.form.controls.confirmacaoSenha.setErrors({ passwordMismatch: true });
+    }
+
+    if (this.form.invalid) {
       this.form.markAllAsTouched();
-      this.error.set(
-        this.form.controls.senha.value !== this.form.controls.confirmarSenha.value
-          ? 'As senhas informadas nao conferem.'
-          : null,
-      );
       return;
     }
 
@@ -75,21 +87,64 @@ export class RegisterPage {
 
     this.auth
       .register({
+        username: normalizeUsername(value.username),
         nome: value.nome.trim(),
-        email: value.email.trim(),
-        phone: onlyDigits(value.phone),
-        cpfCnpj: onlyDigits(value.cpfCnpj),
-        user: value.user.trim(),
+        email: value.email.trim().toLowerCase(),
+        telefone: onlyDigits(value.telefone) ?? '',
         senha: value.senha,
+        confirmacaoSenha: value.confirmacaoSenha,
+        aceitouTermos: value.aceitouTermos,
+        aceitouPoliticaPrivacidade: value.aceitouPoliticaPrivacidade,
       })
       .pipe(finalize(() => this.submitting.set(false)))
       .subscribe({
         next: () => {
+          this.success.set(true);
           void this.router.navigateByUrl(consumeAuthReturnUrl(this.returnUrlService, this.returnUrl()));
         },
         error: (error) => {
           this.error.set(extractApiErrorMessage(error, 'Nao foi possivel criar a conta.'));
         },
       });
+  }
+
+  protected togglePasswordVisibility(): void {
+    this.showPassword.update((current) => !current);
+  }
+
+  protected togglePasswordConfirmationVisibility(): void {
+    this.showPasswordConfirmation.update((current) => !current);
+  }
+
+  protected passwordHasMinimumLength(): boolean {
+    return this.form.controls.senha.value.length >= 6;
+  }
+
+  protected phoneDigits(): string {
+    return onlyDigits(this.form.controls.telefone.value) ?? '';
+  }
+
+  protected usernameErrorMessage(): string {
+    return usernameValidationMessage(this.form.controls.username.errors);
+  }
+
+  private normalizeSafeFields(): void {
+    this.form.controls.nome.setValue(this.form.controls.nome.value.trim(), { emitEvent: false });
+    this.form.controls.username.setValue(normalizeUsername(this.form.controls.username.value), {
+      emitEvent: false,
+    });
+    this.form.controls.email.setValue(this.form.controls.email.value.trim().toLowerCase(), {
+      emitEvent: false,
+    });
+    this.form.controls.telefone.setValue(this.phoneDigits(), { emitEvent: false });
+  }
+
+  private static notBlank(control: AbstractControl<string>): ValidationErrors | null {
+    return control.value.trim() ? null : { blank: true };
+  }
+
+  private static phone(control: AbstractControl<string>): ValidationErrors | null {
+    const digits = onlyDigits(control.value) ?? '';
+    return RegisterPage.phoneRegex.test(digits) ? null : { phone: true };
   }
 }

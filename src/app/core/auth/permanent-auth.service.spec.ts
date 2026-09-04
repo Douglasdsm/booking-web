@@ -21,6 +21,9 @@ const apiConfig: ApiConfig = {
     visitorUser: '/usuariovisitante',
     login: '/login',
     user: '/usuario',
+    publicUserRegister: '/usuario/public/register',
+    usernameStatus: '/usuario/username-status',
+    defineUsername: '/usuario/definir-username',
     booking: '/agendamento',
     publicInvite: (token) => `/convites/public/${token}`,
     acceptClientInvite: (token) => `/convites/public/${token}/aceitar-cliente`,
@@ -75,22 +78,77 @@ describe('PermanentAuthService', () => {
 
     service
       .register({
+        username: 'cliente',
         nome: 'Cliente',
         email: 'cliente@example.com',
-        phone: '65999999999',
-        cpfCnpj: null,
-        user: 'cliente',
+        telefone: '65999999999',
         senha: 'senha',
+        confirmacaoSenha: 'senha',
+        aceitouTermos: true,
+        aceitouPoliticaPrivacidade: true,
       })
       .subscribe();
 
-    const request = httpMock.expectOne('https://api.test/usuario');
+    const request = httpMock.expectOne('https://api.test/usuario/public/register');
     expect(request.request.context.get(BOOKING_AUTH_CONTEXT)).toBe(BookingAuthContext.Anonymous);
     expect(request.request.headers.has('Authorization')).toBe(false);
     request.flush({ id: 1, user: 'cliente', tokens: { accessToken: 'user-token' } });
 
     expect(permanentToken.getToken()).toBe('user-token');
     expect(visitorToken.getToken()).toBe('visitor-token');
+  });
+
+  it('gets username status with permanent user token', () => {
+    permanentToken.setToken('user-token');
+
+    service.usernameStatus().subscribe((response) => {
+      expect(response.podeDefinirUsername).toBe(true);
+    });
+
+    const request = httpMock.expectOne('https://api.test/usuario/username-status');
+    expect(request.request.context.get(BOOKING_AUTH_CONTEXT)).toBe(BookingAuthContext.User);
+    expect(request.request.headers.get('Authorization')).toBe('Bearer user-token');
+    request.flush({
+      possuiUsernameDefinitivo: false,
+      usernameTemporario: true,
+      podeDefinirUsername: true,
+    });
+  });
+
+  it('caches username status until the session changes', () => {
+    permanentToken.setToken('user-token');
+
+    service.usernameStatus().subscribe();
+    httpMock.expectOne('https://api.test/usuario/username-status').flush({
+      possuiUsernameDefinitivo: true,
+      usernameTemporario: false,
+      podeDefinirUsername: false,
+    });
+
+    service.usernameStatus().subscribe((response) => {
+      expect(response.possuiUsernameDefinitivo).toBe(true);
+    });
+    httpMock.expectNone('https://api.test/usuario/username-status');
+  });
+
+  it('defines username without changing the stored token', () => {
+    permanentToken.setToken('user-token');
+
+    service.defineUsername('novo.username').subscribe();
+
+    const request = httpMock.expectOne('https://api.test/usuario/definir-username');
+    expect(request.request.context.get(BOOKING_AUTH_CONTEXT)).toBe(BookingAuthContext.User);
+    expect(request.request.headers.get('Authorization')).toBe('Bearer user-token');
+    expect(request.request.body).toEqual({ username: 'novo.username' });
+    request.flush(null);
+
+    expect(permanentToken.getToken()).toBe('user-token');
+    service.usernameStatus().subscribe((response) => {
+      expect(response.possuiUsernameDefinitivo).toBe(true);
+      expect(response.usernameTemporario).toBe(false);
+      expect(response.podeDefinirUsername).toBe(false);
+    });
+    httpMock.expectNone('https://api.test/usuario/username-status');
   });
 
   it('permanent logout does not remove visitor token', () => {

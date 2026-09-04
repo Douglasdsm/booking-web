@@ -72,12 +72,56 @@ small,
   color: var(--booking-error, #dc2626);
 }
 
-.error-message {
+.error-message,
+.success-message {
   border: 1px solid color-mix(in srgb, var(--booking-error, #dc2626) 30%, transparent);
   border-radius: 12px;
   padding: 10px;
   background: color-mix(in srgb, var(--booking-error, #dc2626) 8%, transparent);
   font-weight: 700;
+}
+
+.success-message {
+  border-color: color-mix(in srgb, var(--booking-success, #16a34a) 30%, transparent);
+  background: color-mix(in srgb, var(--booking-success, #16a34a) 8%, transparent);
+  color: var(--booking-success, #16a34a);
+}
+
+.password-control {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: stretch;
+}
+
+.password-control input {
+  border-radius: 12px 0 0 12px;
+}
+
+.ghost-button {
+  min-height: 46px;
+  border: 1px solid var(--booking-border, #d1d5db);
+  border-left: 0;
+  border-radius: 0 12px 12px 0;
+  padding: 0 12px;
+  background: var(--booking-card, #ffffff);
+  color: var(--booking-primary, #002b5c);
+  font-weight: 900;
+}
+
+.valid-requirement {
+  color: var(--booking-success, #16a34a);
+}
+
+.checkbox-field {
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  font-weight: 700;
+}
+
+.checkbox-field input {
+  width: 18px;
+  min-height: 18px;
+  accent-color: var(--booking-primary, #002b5c);
 }
 
 button {

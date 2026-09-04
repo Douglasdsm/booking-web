@@ -23,6 +23,7 @@ const apiConfig: ApiConfig = {
     visitorUser: '/usuariovisitante',
     login: '/login',
     user: '/usuario',
+    publicUserRegister: '/usuario/public/register',
     booking: '/agendamento',
     publicInvite: (token) => `/convites/public/${token}`,
     acceptClientInvite: (token) => `/convites/public/${token}/aceitar-cliente`,
@@ -121,6 +122,25 @@ describe('LoginPage', () => {
     });
 
     expect(navigateSpy).toHaveBeenCalledWith('/agendar/demo');
+  });
+
+  it('redirects temporary username accounts to username definition using the same token', async () => {
+    await setup('/convite/invite-token');
+    const navigateSpy = vi.spyOn(router, 'navigate').mockResolvedValue(true);
+
+    fillLogin('cliente@email.com', 'senha');
+    submit();
+    httpMock.expectOne('https://api.test/login').flush({
+      id: 1,
+      user: 'cliente@email.com',
+      requerDefinicaoUsername: true,
+      tokens: { accessToken: 'new-user-token' },
+    });
+
+    expect(permanentToken.getToken()).toBe('new-user-token');
+    expect(navigateSpy).toHaveBeenCalledWith(['/definir-username'], {
+      queryParams: { returnUrl: '/convite/invite-token' },
+    });
   });
 
   it('rejects external returnUrl and uses fallback', async () => {

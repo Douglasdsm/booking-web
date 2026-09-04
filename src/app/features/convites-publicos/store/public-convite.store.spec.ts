@@ -24,6 +24,7 @@ const apiConfig: ApiConfig = {
     visitorUser: '/usuariovisitante',
     login: '/login',
     user: '/usuario',
+    publicUserRegister: '/usuario/public/register',
     booking: '/agendamento',
     publicInvite: (token) => `/convites/public/${token}`,
     acceptClientInvite: (token) => `/convites/public/${token}/aceitar-cliente`,

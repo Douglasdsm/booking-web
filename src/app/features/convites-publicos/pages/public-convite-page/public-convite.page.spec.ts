@@ -25,6 +25,7 @@ const apiConfig: ApiConfig = {
     visitorUser: '/usuariovisitante',
     login: '/login',
     user: '/usuario',
+    publicUserRegister: '/usuario/public/register',
     booking: '/agendamento',
     publicInvite: (token) => `/convites/public/${token}`,
     acceptClientInvite: (token) => `/convites/public/${token}/aceitar-cliente`,
@@ -123,7 +124,7 @@ describe('PublicConvitePage', () => {
 
     returnUrlService.setReturnUrl('/convite/invite-token');
     buttons[1].click();
-    expect(navigateSpy).toHaveBeenCalledWith(['/criar-conta'], {
+    expect(navigateSpy).toHaveBeenCalledWith(['/cadastrar'], {
       queryParams: { returnUrl: '/convite/invite-token' },
     });
   });
@@ -366,17 +367,17 @@ describe('PublicConvitePage', () => {
 });
 
 describe('public invite route', () => {
-  it('is public and has no guard', () => {
+  it('keeps the public invite route without canMatch and applies permanent username enforcement only on activation', () => {
     const route = routes.find((item) => item.path === 'convite/:token');
 
     expect(route).toBeTruthy();
-    expect(route?.canActivate).toBeUndefined();
+    expect(route?.canActivate).toBeTruthy();
     expect(route?.canMatch).toBeUndefined();
   });
 
   it('keeps login and register routes public', () => {
     const loginRoute = routes.find((item) => item.path === 'entrar');
-    const registerRoute = routes.find((item) => item.path === 'criar-conta');
+    const registerRoute = routes.find((item) => item.path === 'cadastrar');
 
     expect(loginRoute).toBeTruthy();
     expect(registerRoute).toBeTruthy();

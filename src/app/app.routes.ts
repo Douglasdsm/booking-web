@@ -1,5 +1,7 @@
 import { Routes } from '@angular/router';
 
+import { permanentUsernameGuard } from './core/auth/permanent-username.guard';
+
 export const routes: Routes = [
   {
     path: 'entrar',
@@ -7,12 +9,24 @@ export const routes: Routes = [
       import('./features/auth-publica/pages/login-page/login.page').then((m) => m.LoginPage),
   },
   {
-    path: 'criar-conta',
+    path: 'cadastrar',
     loadComponent: () =>
       import('./features/auth-publica/pages/register-page/register.page').then((m) => m.RegisterPage),
   },
   {
+    path: 'definir-username',
+    loadComponent: () =>
+      import('./features/auth-publica/pages/define-username-page/define-username.page').then(
+        (m) => m.DefineUsernamePage,
+      ),
+  },
+  {
+    path: 'criar-conta',
+    redirectTo: 'cadastrar',
+  },
+  {
     path: 'convite/:token',
+    canActivate: [permanentUsernameGuard],
     loadComponent: () =>
       import('./features/convites-publicos/pages/public-convite-page/public-convite.page').then(
         (m) => m.PublicConvitePage,
@@ -20,6 +34,7 @@ export const routes: Routes = [
   },
   {
     path: 'agendar/:slug',
+    canActivate: [permanentUsernameGuard],
     children: [
       {
         path: '',
@@ -39,8 +54,8 @@ export const routes: Routes = [
     // Phase 37: the minimal V2 public visitor booking client (plan
     // docs/V2/PHASE-37-MINIMAL-BOOKING-CLIENT-V2-PILOT-READINESS-PLAN.md). Routed by EsusId directly,
     // not slug — no safe slug->EsusId HTTP resolution exists yet (registered as a TECHNICAL_GAP in the
-    // Phase 37 report rather than invented). Deliberately no auth guard — the V2 flow has no
-    // account/token concept at all, the visitor is never authenticated.
+    // Phase 37 report rather than invented). Deliberately no `permanentUsernameGuard` — the V2 flow has
+    // no account/token concept at all, the visitor is never authenticated.
     path: 'agendar-v2/:esusId',
     loadComponent: () =>
       import('./features/public-booking-v2/pages/public-booking-v2-page/public-booking-v2.page').then(

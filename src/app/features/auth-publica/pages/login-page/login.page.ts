@@ -32,7 +32,7 @@ export class LoginPage {
   protected readonly returnUrl = signal<string | null>(
     resolveInitialReturnUrl(this.route.snapshot.queryParamMap.get('returnUrl'), this.returnUrlService),
   );
-  protected readonly registerCommands = computed(() => ['/criar-conta']);
+  protected readonly registerCommands = computed(() => ['/cadastrar']);
   protected readonly registerQueryParams = computed(() =>
     this.returnUrl() ? { returnUrl: this.returnUrl() } : null,
   );
@@ -67,8 +67,15 @@ export class LoginPage {
       .login({ user: value.user.trim(), senha: value.senha })
       .pipe(finalize(() => this.submitting.set(false)))
       .subscribe({
-        next: () => {
-          void this.router.navigateByUrl(consumeAuthReturnUrl(this.returnUrlService, this.returnUrl()));
+        next: (response) => {
+          const nextUrl = consumeAuthReturnUrl(this.returnUrlService, this.returnUrl());
+
+          if (response.requerDefinicaoUsername) {
+            void this.router.navigate(['/definir-username'], { queryParams: { returnUrl: nextUrl } });
+            return;
+          }
+
+          void this.router.navigateByUrl(nextUrl);
         },
         error: (error) => {
           this.error.set(
