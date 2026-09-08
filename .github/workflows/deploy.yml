@@ -94,11 +94,39 @@ jobs:
           host_port="$3"
           ghcr_actor="$4"
           ghcr_token="$5"
+          staging="${container}-staging"
+
           echo "$ghcr_token" | docker login ghcr.io -u "$ghcr_actor" --password-stdin
           docker pull "$image"
           docker logout ghcr.io
+
+          # Validate the new image in a staging container (no published port yet) before
+          # touching production, so a bad image never takes the live site down: the
+          # HEALTHCHECK/wget probes below run inside the container's own network
+          # namespace and don't need a host port to work.
+          docker rm -f "$staging" 2>/dev/null || true
+          docker run -d --name "$staging" "$image"
+
+          healthy=0
+          for attempt in $(seq 1 30); do
+            status=$(docker inspect --format '{{if .State.Health}}{{.State.Health.Status}}{{else}}no-healthcheck{{end}}' "$staging")
+            if [ "$status" = healthy ]; then healthy=1; break; fi
+            if [ "$status" = unhealthy ]; then break; fi
+            sleep 2
+          done
+
+          if [ "$healthy" -ne 1 ] || ! docker exec "$staging" wget -q -O /dev/null http://127.0.0.1/; then
+            echo "New image failed validation; leaving current production container untouched." >&2
+            docker logs "$staging" >&2 || true
+            docker rm -f "$staging" 2>/dev/null || true
+            exit 1
+          fi
+
+          # New image proved healthy: now do the actual production swap.
+          docker rm -f "$staging"
           docker rm -f "$container" 2>/dev/null || true
           docker run -d --name "$container" --restart unless-stopped -p "${host_port}:80" "$image"
+
           for attempt in $(seq 1 30); do
             status=$(docker inspect --format '{{if .State.Health}}{{.State.Health.Status}}{{else}}no-healthcheck{{end}}' "$container")
             [ "$status" = healthy ] && break
