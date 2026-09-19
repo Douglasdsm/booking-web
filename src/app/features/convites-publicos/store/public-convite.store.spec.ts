@@ -14,7 +14,6 @@ import { PublicConviteStore } from './public-convite.store';
 
 const apiConfig: ApiConfig = {
   baseUrl: 'https://api.test',
-  swaggerUrl: 'https://api.test/swagger.json',
   endpoints: {
     bookingConfig: (slug) => `/booking/config/${slug}`,
     bookingTheme: (pessoaJuridicaId) => `/pessoajuridica-booking-theme/public/${pessoaJuridicaId}`,

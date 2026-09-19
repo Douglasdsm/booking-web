@@ -67,6 +67,7 @@ export interface AcceptProviderConviteRequest {
 }
 
 export interface AcceptProviderConviteResponse {
+  prestadorIdentidadeID: PrestadorIdentidadeId | null;
   status: PublicConviteStatus;
   empresa: string | null;
   filial: string | null;
@@ -92,3 +93,4 @@ export type PublicConviteViewState =
   | 'not-found'
   | 'temporary-error'
   | 'invalid-token';
+import { PrestadorIdentidadeId } from '../../../core/api/identity.types';

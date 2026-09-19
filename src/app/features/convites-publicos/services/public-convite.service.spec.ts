@@ -11,7 +11,6 @@ import { PublicConviteService } from './public-convite.service';
 
 const apiConfig: ApiConfig = {
   baseUrl: 'https://api.test',
-  swaggerUrl: 'https://api.test/swagger.json',
   endpoints: {
     bookingConfig: (slug) => `/booking/config/${slug}`,
     bookingTheme: (pessoaJuridicaId) => `/pessoajuridica-booking-theme/public/${pessoaJuridicaId}`,
@@ -119,7 +118,7 @@ describe('PublicConviteService', () => {
     request.flush({ status: 2 });
   });
 
-  it('accepts provider invite with User context, permanent token only and no operational config', () => {
+  it('accepts provider invite with User context and preserves PrestadorIdentidadeID', () => {
     visitorToken.setToken('visitor-token');
     permanentToken.setToken('user-token');
 
@@ -130,7 +129,7 @@ describe('PublicConviteService', () => {
         escoposAutorizados: 7,
         versaoTermo: 'person-sharing-v1',
       })
-      .subscribe();
+      .subscribe((response) => expect(response.prestadorIdentidadeID).toBe(73));
 
     const request = httpMock.expectOne('https://api.test/convites/public/invite-token/aceitar-prestador');
     expect(request.request.method).toBe('POST');
@@ -153,7 +152,7 @@ describe('PublicConviteService', () => {
     expect(request.request.body.deveAcessarPainel).toBeUndefined();
     expect(request.request.body.deveAparecerBooking).toBeUndefined();
     expect(request.request.body.tipoConvite).toBeUndefined();
-    request.flush({ status: 2 });
+    request.flush({ status: 2, prestadorIdentidadeID: 73 });
   });
 
   it('does not send visitor token as fallback for provider acceptance', () => {

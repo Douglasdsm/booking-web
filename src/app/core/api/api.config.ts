@@ -20,11 +20,8 @@ export interface ApiEndpointsConfig {
 
 export interface ApiConfig {
   baseUrl: string;
-  swaggerUrl: string;
   endpoints: ApiEndpointsConfig;
 }
-
-const swaggerUrl = 'https://168.231.66.108:8080/swagger/v1/swagger.json';
 
 /**
  * Phase 38B: the API base URL is now configurable per environment at container runtime, not only at
@@ -36,16 +33,20 @@ const swaggerUrl = 'https://168.231.66.108:8080/swagger/v1/swagger.json';
  * explicitly supplies `API_BASE_URL` at container start (see `booking-web/Dockerfile` and
  * `docs/V2/PILOT-CONFIGURATION-CONTRACT.md`) does this resolve to something else.
  */
-function resolveApiBaseUrl(): string {
-  const runtimeEnv = (globalThis as { __env?: { apiBaseUrl?: string } }).__env;
+export function resolveApiBaseUrl(
+  runtimeEnv = (globalThis as { __env?: { apiBaseUrl?: string } }).__env,
+  serverEnv = (globalThis as { process?: { env?: Record<string, string | undefined> } }).process?.env,
+  browserOrigin: string | null = typeof window !== 'undefined' ? window.location.origin : null,
+): string {
   const override = runtimeEnv?.apiBaseUrl?.trim();
   if (override) return override;
-  return typeof window !== 'undefined' ? window.location.origin : 'https://localhost:8080';
+  const serverOverride = serverEnv?.['API_BASE_URL']?.trim();
+  if (serverOverride) return serverOverride;
+  return browserOrigin ?? '';
 }
 
 export const apiConfig: ApiConfig = {
   baseUrl: resolveApiBaseUrl(),
-  swaggerUrl,
   endpoints: {
     bookingConfig: (slug) => `/booking/config/${slug}`,
     bookingTheme: (pessoaJuridicaId) => `/pessoajuridica-booking-theme/public/${pessoaJuridicaId}`,
