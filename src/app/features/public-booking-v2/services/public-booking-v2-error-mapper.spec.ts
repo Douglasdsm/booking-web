@@ -2,8 +2,8 @@ import { HttpErrorResponse } from '@angular/common/http';
 
 import { mapPublicBookingError } from './public-booking-v2-error-mapper';
 
-function errorResponse(status: number, errors: string[] = []): HttpErrorResponse {
-  return new HttpErrorResponse({ status, error: { errors, tokenExpired: false } });
+function errorResponse(status: number, errors?: string[]): HttpErrorResponse {
+  return new HttpErrorResponse({ status, error: errors ? { errors, tokenExpired: false } : { tokenExpired: false } });
 }
 
 describe('mapPublicBookingError', () => {
@@ -52,6 +52,31 @@ describe('mapPublicBookingError', () => {
     expect(mapPublicBookingError(errorResponse(400, ['ServiceOfferId é obrigatório.'])).kind).toBe(
       'ValidationProblem',
     );
+  });
+
+  it('preserves every validation message from ResponseErrorJson', () => {
+    const result = mapPublicBookingError(
+      errorResponse(400, ['ServiceOfferId é obrigatório.', 'RequestedStartUtc deve ser UTC.']),
+    );
+
+    expect(result.kind).toBe('ValidationProblem');
+    expect(result.message).toBe('ServiceOfferId é obrigatório.\nRequestedStartUtc deve ser UTC.');
+  });
+
+  it('uses a safe validation fallback when the response has no errors array', () => {
+    const result = mapPublicBookingError(errorResponse(400));
+
+    expect(result.kind).toBe('ValidationProblem');
+    expect(result.message).toBe('Revise os dados informados.');
+  });
+
+  it('keeps the legacy message fallback while old endpoints still return it', () => {
+    const result = mapPublicBookingError(
+      new HttpErrorResponse({ status: 400, error: { message: 'Telefone legado inválido.' } }),
+    );
+
+    expect(result.kind).toBe('ValidationProblem');
+    expect(result.message).toBe('Telefone legado inválido.');
   });
 
   it('maps 429 to RateLimited', () => {

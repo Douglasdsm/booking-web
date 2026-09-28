@@ -10,11 +10,25 @@ import { ApiErrorBody, PublicBookingError, PublicBookingErrorKind } from '../mod
  * the authoritative fallback so an unrecognized/rewritten message string still lands in a sane bucket.
  */
 export function mapPublicBookingError(error: HttpErrorResponse): PublicBookingError {
-  const body = error.error as ApiErrorBody | null | undefined;
-  const serverMessage = body?.errors?.[0] ?? '';
+  const serverMessage = extractMessages(error.error).join('\n');
   const kind = classify(error.status, serverMessage);
 
   return { kind, message: userFacingMessage(kind, serverMessage) };
+}
+
+function extractMessages(body: unknown): string[] {
+  if (typeof body !== 'object' || body === null) return [];
+
+  const apiError = body as Partial<ApiErrorBody> & Record<string, unknown>;
+  if (Array.isArray(apiError.errors)) {
+    const messages = apiError.errors.filter(
+      (message): message is string => typeof message === 'string' && message.trim().length > 0,
+    );
+    if (messages.length > 0) return messages;
+  }
+
+  const legacyMessage = apiError['message'] ?? apiError['mensagem'] ?? apiError['detail'] ?? apiError['title'];
+  return typeof legacyMessage === 'string' && legacyMessage.trim().length > 0 ? [legacyMessage] : [];
 }
 
 function classify(status: number, serverMessage: string): PublicBookingErrorKind {
@@ -56,7 +70,7 @@ function userFacingMessage(kind: PublicBookingErrorKind, serverMessage: string):
     case 'SlotUnavailable':
       return 'Esse horário acabou de ficar indisponível. Escolha outro horário.';
     case 'InvalidVisitorData':
-      return 'Confira seu nome e telefone.';
+      return serverMessage || 'Confira seu nome e telefone.';
     case 'InvalidService':
       return 'Serviço não encontrado ou indisponível.';
     case 'ValidationProblem':
