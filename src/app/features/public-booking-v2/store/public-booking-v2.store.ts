@@ -25,6 +25,8 @@ interface PublicBookingV2State {
   submitError: PublicBookingError | null;
   loading: boolean;
   loadError: PublicBookingError | null;
+  catalogError: PublicBookingError | null;
+  availabilityError: PublicBookingError | null;
   publicStatus: PublicBookingStatusResult | null;
 }
 
@@ -42,6 +44,8 @@ const initialState: PublicBookingV2State = {
   submitError: null,
   loading: false,
   loadError: null,
+  catalogError: null,
+  availabilityError: null,
   publicStatus: null,
 };
 
@@ -68,6 +72,8 @@ export class PublicBookingV2Store {
   readonly submitError = computed(() => this.state().submitError);
   readonly loading = computed(() => this.state().loading);
   readonly loadError = computed(() => this.state().loadError);
+  readonly catalogError = computed(() => this.state().catalogError);
+  readonly availabilityError = computed(() => this.state().availabilityError);
   readonly publicStatus = computed(() => this.state().publicStatus);
 
   readonly publicBookingEnabled = computed(() => this.state().esusProfile?.publicBookingEnabled === true);
@@ -81,15 +87,15 @@ export class PublicBookingV2Store {
   }
 
   setServiceOffers(serviceOffers: PublicServiceOffer[]): void {
-    this.patch({ serviceOffers });
+    this.patch({ serviceOffers, catalogError: null });
   }
 
   selectServiceOffer(selectedServiceOffer: PublicServiceOffer): void {
-    this.patch({ selectedServiceOffer, selectedSlot: null, availabilityItems: [] });
+    this.patch({ selectedServiceOffer, selectedSlot: null, availabilityItems: [], availabilityError: null, submitError: null });
   }
 
   setAvailabilityItems(availabilityItems: BookingPreview[]): void {
-    this.patch({ availabilityItems });
+    this.patch({ availabilityItems, availabilityError: null });
   }
 
   /** Called after a `SlotUnavailable` conflict — the stale slot is no longer trustworthy and must not
@@ -130,6 +136,14 @@ export class PublicBookingV2Store {
 
   setLoadError(loadError: PublicBookingError | null): void {
     this.patch({ loadError });
+  }
+
+  setCatalogError(catalogError: PublicBookingError | null): void {
+    this.patch({ catalogError });
+  }
+
+  setAvailabilityError(availabilityError: PublicBookingError | null): void {
+    this.patch({ availabilityError });
   }
 
   reset(): void {

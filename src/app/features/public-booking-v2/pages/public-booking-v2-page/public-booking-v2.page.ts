@@ -1,16 +1,17 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { finalize } from 'rxjs/operators';
 
 import { BookingLayoutComponent } from '../../../booking/components/booking-layout/booking-layout.component';
-import { BookingPreview, PublicServiceOffer } from '../../models/public-booking-v2.models';
+import { BookingPreview, PublicBookingErrorKind, PublicServiceOffer } from '../../models/public-booking-v2.models';
 import { IdempotencyKeyService } from '../../services/idempotency-key.service';
 import { mapPublicBookingError } from '../../services/public-booking-v2-error-mapper';
 import { PublicBookingV2ApiService } from '../../services/public-booking-v2-api.service';
 import { PublicBookingV2Store } from '../../store/public-booking-v2.store';
 
 const AVAILABILITY_RANGE_DAYS = 14;
+const STATUS_TOKEN_STORAGE_PREFIX = 'public-booking-v2:status-token:';
 
 /**
  * Phase 37: the minimal public V2 booking page (plan §"ESCOPO FUNCIONAL MÍNIMO") — one page, no
@@ -115,7 +116,7 @@ export class PublicBookingV2Page {
         next: (result) => {
           this.idempotency.clear();
           if (result.publicStatusToken) {
-            try { sessionStorage.setItem('public-booking-v2:status-token', result.publicStatusToken); } catch { /* SSR */ }
+            this.setStoredStatusToken(esusId, result.publicStatusToken);
           }
           this.store.setSubmitSuccess(result);
         },
@@ -126,19 +127,20 @@ export class PublicBookingV2Page {
           // Slot conflict: the stale candidate must never be silently resubmitted or auto-replaced
           // (plan §"CONCORRÊNCIA NORMAL" — "não escolher outro horário sozinho"). Refresh the list so
           // the visitor picks a REAL currently-available slot next.
-          if (mapped.kind === 'SlotUnavailable') {
+          if (this.isRecoverableSelectionFailure(mapped.kind)) {
             this.store.clearAvailabilityAfterConflict();
-            if (serviceOffer) {
-              this.loadAvailability(serviceOffer);
-            }
+            this.loadAvailability(serviceOffer);
           }
         },
       });
   }
 
-  protected startOver(): void {
+  protected startNewBooking(): void {
     const esusId = this.store.esusId();
     this.idempotency.clear();
+    if (esusId !== null) {
+      this.removeStoredStatusToken(esusId);
+    }
     this.store.reset();
 
     if (esusId !== null) {
@@ -157,10 +159,8 @@ export class PublicBookingV2Page {
       .subscribe({
         next: (profile) => {
           this.store.setEsusProfile(profile);
-          try {
-            const token = sessionStorage.getItem('public-booking-v2:status-token');
-            if (token) this.refreshPublicStatus(esusId, token);
-          } catch { /* SSR */ }
+          const token = this.getStoredStatusToken(esusId);
+          if (token) this.refreshPublicStatus(esusId, token);
 
           if (profile.publicBookingEnabled) {
             this.loadServiceOffers(esusId);
@@ -171,7 +171,7 @@ export class PublicBookingV2Page {
   }
 
   protected refreshPublicStatus(esusId = this.store.esusId()!, token?: string): void {
-    const statusToken = token ?? (() => { try { return sessionStorage.getItem('public-booking-v2:status-token') ?? ''; } catch { return ''; } })();
+    const statusToken = token ?? this.getStoredStatusToken(esusId);
     if (!statusToken || !esusId) return;
     this.api.getPublicBookingStatus(esusId, statusToken).subscribe({
       next: (status) => this.store.setPublicStatus(status),
@@ -181,14 +181,20 @@ export class PublicBookingV2Page {
 
   private loadServiceOffers(esusId: number): void {
     this.store.setLoading(true);
+    this.store.setCatalogError(null);
 
     this.api
       .getServiceOffers(esusId)
       .pipe(finalize(() => this.store.setLoading(false)))
       .subscribe({
         next: (response) => this.store.setServiceOffers(response.serviceOffers ?? []),
-        error: (error: HttpErrorResponse) => this.store.setLoadError(mapPublicBookingError(error)),
+        error: (error: HttpErrorResponse) => this.store.setCatalogError(mapPublicBookingError(error)),
       });
+  }
+
+  protected retryServiceOffers(): void {
+    const esusId = this.store.esusId();
+    if (esusId !== null) this.loadServiceOffers(esusId);
   }
 
   private loadAvailability(serviceOffer: PublicServiceOffer): void {
@@ -199,7 +205,7 @@ export class PublicBookingV2Page {
     }
 
     this.store.setLoading(true);
-    this.store.setLoadError(null);
+    this.store.setAvailabilityError(null);
     const version = ++this.availabilityRequestVersion;
 
     const startDate = this.toDateOnly(this.today);
@@ -210,8 +216,13 @@ export class PublicBookingV2Page {
       .pipe(finalize(() => this.store.setLoading(false)))
       .subscribe({
         next: (response) => { if (version === this.availabilityRequestVersion) this.store.setAvailabilityItems(response.items ?? []); },
-        error: (error: HttpErrorResponse) => { if (version === this.availabilityRequestVersion) this.store.setLoadError(mapPublicBookingError(error)); },
+        error: (error: HttpErrorResponse) => { if (version === this.availabilityRequestVersion) this.store.setAvailabilityError(mapPublicBookingError(error)); },
       });
+  }
+
+  protected retryAvailability(): void {
+    const serviceOffer = this.store.selectedServiceOffer();
+    if (serviceOffer) this.loadAvailability(serviceOffer);
   }
 
   protected formatCurrency(value: number): string {
@@ -231,5 +242,25 @@ export class PublicBookingV2Page {
     const result = new Date(date);
     result.setUTCDate(result.getUTCDate() + days);
     return result;
+  }
+
+  private isRecoverableSelectionFailure(kind: PublicBookingErrorKind): boolean {
+    return kind === 'SlotUnavailable' || kind === 'ServiceUnavailable' || kind === 'InvalidService';
+  }
+
+  private getStoredStatusToken(esusId: number): string {
+    try { return sessionStorage.getItem(this.statusTokenStorageKey(esusId)) ?? ''; } catch { return ''; }
+  }
+
+  private setStoredStatusToken(esusId: number, token: string): void {
+    try { sessionStorage.setItem(this.statusTokenStorageKey(esusId), token); } catch { /* SSR */ }
+  }
+
+  private removeStoredStatusToken(esusId: number): void {
+    try { sessionStorage.removeItem(this.statusTokenStorageKey(esusId)); } catch { /* SSR */ }
+  }
+
+  private statusTokenStorageKey(esusId: number): string {
+    return `${STATUS_TOKEN_STORAGE_PREFIX}${esusId}`;
   }
 }

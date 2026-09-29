@@ -15,7 +15,7 @@
       </div>
       <div class="booking-state">Agendamento online indisponível.</div>
     } @else if (store.esusProfile()) {
-      @if (store.publicStatus() && store.submitStatus() !== 'success') {
+      @if (store.publicStatus()) {
         <section class="booking-success-card">
           @if (store.publicStatus()!.status === 'Pending') {
             <h2>SOLICITAÇÃO EM ANÁLISE</h2><p>O estabelecimento ainda precisa confirmar este pedido.</p>
@@ -25,6 +25,7 @@
             <h2>SOLICITAÇÃO RECUSADA</h2><p>Este pedido não foi aceito. Escolha outro horário.</p>
           }
           <button type="button" class="booking-button" (click)="refreshPublicStatus()">Atualizar status</button>
+          <button type="button" class="booking-button" (click)="startNewBooking()">Fazer novo agendamento</button>
         </section>
       } @else {
       @if (store.submitStatus() === 'success' && store.result()) {
@@ -58,14 +59,22 @@
           </div>
         </section>
 
-        <button type="button" class="booking-button" (click)="startOver()">Novo agendamento</button>
+        @if (store.result()!.status === 'PendingApproval' && store.result()!.publicStatusToken) {
+          <button type="button" class="booking-button" (click)="refreshPublicStatus()">Atualizar status</button>
+        }
+        <button type="button" class="booking-button" (click)="startNewBooking()">Fazer novo agendamento</button>
       } @else {
         <div class="booking-title">
           <h2>ESCOLHA O SERVIÇO</h2>
           <p>Selecione um serviço para ver os horários disponíveis.</p>
         </div>
 
-        @if (store.loading() && !store.serviceOffers().length) {
+        @if (store.catalogError()) {
+          <div class="booking-state booking-state--error" role="alert" data-testid="catalog-error">
+            {{ store.catalogError()!.message }}
+          </div>
+          <button type="button" class="booking-button" data-testid="retry-catalog" (click)="retryServiceOffers()">Tentar carregar serviços novamente</button>
+        } @else if (store.loading() && !store.serviceOffers().length) {
           <div class="booking-state">Carregando serviços...</div>
         } @else if (!store.serviceOffers().length) {
           <div class="booking-state">Nenhum serviço disponível no momento.</div>
@@ -98,7 +107,12 @@
             <p>Horários sujeitos a confirmação — outra pessoa pode reservar antes de você.</p>
           </div>
 
-          @if (store.loading()) {
+          @if (store.availabilityError()) {
+            <div class="booking-state booking-state--error" role="alert" data-testid="availability-error">
+              {{ store.availabilityError()!.message }}
+            </div>
+            <button type="button" class="booking-button" data-testid="retry-availability" (click)="retryAvailability()">Buscar horários novamente</button>
+          } @else if (store.loading()) {
             <div class="booking-state">Carregando horários...</div>
           } @else if (!store.availabilityItems().length) {
             <div class="booking-state">Nenhum horário disponível nos próximos dias.</div>
@@ -116,6 +130,10 @@
               }
             </div>
           }
+        }
+
+        @if (store.submitStatus() === 'error' && store.submitError()) {
+          <div class="booking-state booking-state--error" role="alert">{{ store.submitError()!.message }}</div>
         }
 
         @if (store.selectedSlot()) {
@@ -153,10 +171,6 @@
               />
             </label>
           </form>
-
-          @if (store.submitStatus() === 'error' && store.submitError()) {
-            <div class="booking-state booking-state--error" role="alert">{{ store.submitError()!.message }}</div>
-          }
 
           <button
             type="button"

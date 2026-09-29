@@ -66,13 +66,13 @@ function userFacingMessage(kind: PublicBookingErrorKind, serverMessage: string):
     case 'PublicBookingDisabled':
       return 'Agendamento online indisponível.';
     case 'ServiceUnavailable':
-      return 'Não foi possível carregar os dados deste estabelecimento agora.';
+      return 'O serviço ou profissional selecionado não está mais disponível. A lista foi atualizada; selecione outro horário.';
     case 'SlotUnavailable':
-      return 'Esse horário acabou de ficar indisponível. Escolha outro horário.';
+      return 'Esse horário acabou de ficar indisponível. A lista foi atualizada; selecione outro horário.';
     case 'InvalidVisitorData':
       return serverMessage || 'Confira seu nome e telefone.';
     case 'InvalidService':
-      return 'Serviço não encontrado ou indisponível.';
+      return 'O serviço ou horário selecionado não está mais disponível. A lista foi atualizada; faça uma nova escolha.';
     case 'ValidationProblem':
       return serverMessage || 'Revise os dados informados.';
     case 'Conflict':
