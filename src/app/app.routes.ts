@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 
 import { permanentUsernameGuard } from './core/auth/permanent-username.guard';
+import { sessionRequiredGuard } from './core/auth/session-required.guard';
 
 export const routes: Routes = [
   {
@@ -31,6 +32,11 @@ export const routes: Routes = [
       import('./features/convites-publicos/pages/public-convite-page/public-convite.page').then(
         (m) => m.PublicConvitePage,
       ),
+  },
+  {
+    path: 'meus-avisos',
+    canActivate: [sessionRequiredGuard],
+    loadComponent: () => import('./features/avisos/avisos.page').then((m) => m.AvisosPage),
   },
   {
     path: 'agendar/:slug',
