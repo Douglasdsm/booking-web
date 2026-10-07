@@ -35,6 +35,10 @@ export const serverRoutes: ServerRoute[] = [
     renderMode: RenderMode.Server
   },
   {
+    path: 'reservar/:esusId',
+    renderMode: RenderMode.Server
+  },
+  {
     path: 'meus-avisos',
     renderMode: RenderMode.Server
   },
