@@ -39,6 +39,10 @@ export const serverRoutes: ServerRoute[] = [
     renderMode: RenderMode.Server
   },
   {
+    path: 'meus-agendamentos',
+    renderMode: RenderMode.Server
+  },
+  {
     path: 'meus-avisos',
     renderMode: RenderMode.Server
   },

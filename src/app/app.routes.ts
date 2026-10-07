@@ -39,6 +39,11 @@ export const routes: Routes = [
     loadComponent: () => import('./features/reserva-autenticada/reserva.page').then((m) => m.ReservaPage),
   },
   {
+    path: 'meus-agendamentos',
+    canActivate: [sessionRequiredGuard],
+    loadComponent: () => import('./features/meus-agendamentos/meus-agendamentos.page').then((m) => m.MeusAgendamentosPage),
+  },
+  {
     path: 'meus-avisos',
     canActivate: [sessionRequiredGuard],
     loadComponent: () => import('./features/avisos/avisos.page').then((m) => m.AvisosPage),
