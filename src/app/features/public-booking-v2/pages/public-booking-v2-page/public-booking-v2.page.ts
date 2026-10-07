@@ -1,5 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { finalize } from 'rxjs/operators';
 
@@ -10,7 +10,7 @@ import { mapPublicBookingError } from '../../services/public-booking-v2-error-ma
 import { PublicBookingV2ApiService } from '../../services/public-booking-v2-api.service';
 import { PublicBookingV2Store } from '../../store/public-booking-v2.store';
 
-const AVAILABILITY_RANGE_DAYS = 14;
+const AVAILABILITY_WINDOW_DAYS = 7;
 const STATUS_TOKEN_STORAGE_PREFIX = 'public-booking-v2:status-token:';
 
 /**
@@ -39,6 +39,77 @@ export class PublicBookingV2Page {
   protected readonly store = inject(PublicBookingV2Store);
   protected readonly today = new Date();
 
+  /** V2-MC-01: weekly availability window; 0 = the week starting today (Esus timezone). */
+  protected readonly weekOffset = signal(0);
+  protected readonly timeZone = computed(() => this.store.esusProfile()?.timeZoneId ?? 'UTC');
+
+  /** Candidates grouped by calendar day in the ESUS timezone (never the browser's). */
+  protected readonly slotGroups = computed(() => {
+    const groups: { key: string; heading: string; slots: BookingPreview[] }[] = [];
+    for (const slot of this.store.availabilityItems()) {
+      const key = this.dayKey(slot.startUtc);
+      let group = groups.find((item) => item.key === key);
+      if (!group) {
+        group = { key, heading: `${this.formatWeekday(slot.startUtc)} ${this.formatDay(slot.startUtc)}`, slots: [] };
+        groups.push(group);
+      }
+      group.slots.push(slot);
+    }
+    return groups;
+  });
+
+  /** Presentation of the public status: only what the backend contract proves is shown as confirmed. */
+  protected readonly statusView = computed(() => {
+    const status = this.store.publicStatus();
+    if (!status) return null;
+    const effective = `${this.formatDay(status.startUtc)} ${this.formatTime(status.startUtc)} – ${this.formatTime(status.endUtc)}`;
+    const requested = status.requestedStartUtc && status.requestedEndUtc
+      ? `${this.formatDay(status.requestedStartUtc)} ${this.formatTime(status.requestedStartUtc)} – ${this.formatTime(status.requestedEndUtc)}`
+      : null;
+    let heading: string;
+    let message: string;
+    if (status.status === 'Pending') {
+      heading = 'SOLICITAÇÃO EM ANÁLISE';
+      message = 'O estabelecimento ainda precisa confirmar este pedido.';
+    } else if (status.status === 'Rejected') {
+      heading = 'SOLICITAÇÃO RECUSADA';
+      message = 'Este pedido não foi aceito. Escolha outro horário.';
+    } else if (status.bookingState === 'Cancelled') {
+      heading = 'AGENDAMENTO CANCELADO';
+      message = 'Este agendamento foi cancelado pelo estabelecimento.';
+    } else if (status.bookingState === 'NoShow') {
+      heading = 'AUSÊNCIA REGISTRADA';
+      message = 'O estabelecimento registrou que este agendamento não foi realizado.';
+    } else if (status.bookingState === 'Active' && status.rescheduled) {
+      heading = 'HORÁRIO ALTERADO';
+      message = 'O estabelecimento alterou o horário do seu agendamento. Este é o horário vigente.';
+    } else if (status.bookingState === 'Active') {
+      heading = 'AGENDAMENTO CONFIRMADO';
+      message = 'Seu pedido foi aceito pelo estabelecimento.';
+    } else {
+      heading = 'STATUS EM ATUALIZAÇÃO';
+      message = 'Não foi possível confirmar o estado atual do agendamento. Atualize o status.';
+    }
+    const isAccepted = status.status === 'Accepted' && !!status.bookingState;
+    return {
+      heading,
+      message,
+      effectiveLabel: isAccepted ? 'Horário vigente' : 'Intervalo solicitado',
+      effective,
+      requested: isAccepted && status.rescheduled ? requested : null,
+      pendingNote: status.status === 'Pending' ? 'Este horário ainda não está confirmado.' : null,
+      price: isAccepted ? status.effectivePrice ?? null : status.frozenPrice ?? null,
+      duration: isAccepted ? status.effectiveDurationMinutes ?? null : status.frozenDurationMinutes ?? null,
+      priceLabel: isAccepted ? 'Valor' : 'Valor congelado na solicitação',
+      prestadorName: status.prestadorName ?? null,
+      locationName: status.executionLocationName ?? null,
+      holdActive: status.status === 'Pending' && status.holdStatus === 'Active',
+      holdExpiresAt: status.holdExpiresAtUtc ? `${this.formatDay(status.holdExpiresAtUtc)} ${this.formatTime(status.holdExpiresAtUtc)}` : null,
+    };
+  });
+
+  protected readonly canGoPrevious = computed(() => this.weekOffset() > 0);
+
   protected readonly canSubmit = computed(
     () =>
       !!this.store.selectedServiceOffer() &&
@@ -66,9 +137,36 @@ export class PublicBookingV2Page {
   }
 
   protected selectServiceOffer(serviceOffer: PublicServiceOffer): void {
+    this.weekOffset.set(0);
     this.store.selectServiceOffer(serviceOffer);
     this.idempotency.next();
     this.loadAvailability(serviceOffer);
+  }
+
+  protected nextWeek(): void {
+    this.changeWeek(this.weekOffset() + 1);
+  }
+
+  protected previousWeek(): void {
+    if (this.canGoPrevious()) this.changeWeek(this.weekOffset() - 1);
+  }
+
+  private changeWeek(offset: number): void {
+    const serviceOffer = this.store.selectedServiceOffer();
+    if (!serviceOffer) return;
+    this.weekOffset.set(offset);
+    this.store.clearAvailabilityAfterConflict();
+    this.idempotency.next();
+    this.loadAvailability(serviceOffer);
+  }
+
+  protected slotKey(slot: BookingPreview): string {
+    return `${slot.startUtc}|${slot.prestadorId}|${slot.executionLocationId}`;
+  }
+
+  protected isSelected(slot: BookingPreview): boolean {
+    const selected = this.store.selectedSlot();
+    return !!selected && this.slotKey(selected) === this.slotKey(slot);
   }
 
   protected selectSlot(slot: BookingPreview): void {
@@ -208,8 +306,9 @@ export class PublicBookingV2Page {
     this.store.setAvailabilityError(null);
     const version = ++this.availabilityRequestVersion;
 
-    const startDate = this.toDateOnly(this.today);
-    const endDate = this.toDateOnly(this.addDays(this.today, AVAILABILITY_RANGE_DAYS));
+    const windowStart = this.addDays(this.today, this.weekOffset() * AVAILABILITY_WINDOW_DAYS);
+    const startDate = this.toDateOnly(windowStart);
+    const endDate = this.toDateOnly(this.addDays(windowStart, AVAILABILITY_WINDOW_DAYS));
 
     this.api
       .searchAvailability(esusId, { serviceOfferId: serviceOffer.id, startDate, endDate })
@@ -230,7 +329,23 @@ export class PublicBookingV2Page {
   }
 
   protected formatSlotTime(iso: string): string {
-    return new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(iso));
+    return `${this.formatDay(iso)} ${this.formatTime(iso)}`;
+  }
+
+  protected formatTime(iso: string): string {
+    return new Intl.DateTimeFormat('pt-BR', { timeZone: this.timeZone(), hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(new Date(iso));
+  }
+
+  protected formatDay(iso: string): string {
+    return new Intl.DateTimeFormat('pt-BR', { timeZone: this.timeZone(), day: '2-digit', month: '2-digit', year: 'numeric' }).format(new Date(iso));
+  }
+
+  protected formatWeekday(iso: string): string {
+    return new Intl.DateTimeFormat('pt-BR', { timeZone: this.timeZone(), weekday: 'long' }).format(new Date(iso));
+  }
+
+  private dayKey(iso: string): string {
+    return new Intl.DateTimeFormat('en-CA', { timeZone: this.timeZone() }).format(new Date(iso));
   }
 
   private toDateOnly(date: Date): string {

@@ -47,13 +47,36 @@ export interface BookingPreview {
   durationMinutes: number;
   currentPrice: number;
   currency: string;
+  /** V2-MC-01: canonical names resolved by the backend (never inferred by the UI). */
+  prestadorName?: string | null;
+  executionLocationName?: string | null;
 }
+
+/**
+ * V2-MC-01: `status` is the REQUEST status. After Accepted the canonical Booking is the authority:
+ * `startUtc`/`endUtc` are the CURRENT effective interval and `bookingState` its lifecycle state. The requested
+ * interval and frozen snapshot are separate and must never be shown as the confirmed Booking.
+ */
+export type PublicBookingState = 'Active' | 'Cancelled' | 'NoShow';
 
 export interface PublicBookingStatusResult {
   status: 'Pending' | 'Accepted' | 'Rejected';
   startUtc: string;
   endUtc: string;
   serviceLabel: string;
+  bookingState?: PublicBookingState | null;
+  rescheduled?: boolean;
+  requestedStartUtc?: string;
+  requestedEndUtc?: string;
+  frozenPrice?: number;
+  frozenDurationMinutes?: number;
+  effectivePrice?: number | null;
+  effectiveDurationMinutes?: number | null;
+  currency?: string;
+  holdStatus?: string | null;
+  holdExpiresAtUtc?: string | null;
+  prestadorName?: string | null;
+  executionLocationName?: string | null;
 }
 
 export interface AvailabilitySearchResponse {

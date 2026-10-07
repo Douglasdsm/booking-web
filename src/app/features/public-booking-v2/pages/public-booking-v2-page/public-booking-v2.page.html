@@ -17,12 +17,37 @@
     } @else if (store.esusProfile()) {
       @if (store.publicStatus()) {
         <section class="booking-success-card">
-          @if (store.publicStatus()!.status === 'Pending') {
-            <h2>SOLICITAÇÃO EM ANÁLISE</h2><p>O estabelecimento ainda precisa confirmar este pedido.</p>
-          } @else if (store.publicStatus()!.status === 'Accepted') {
-            <h2>AGENDAMENTO CONFIRMADO</h2><p>Seu pedido foi aceito pelo estabelecimento.</p>
-          } @else {
-            <h2>SOLICITAÇÃO RECUSADA</h2><p>Este pedido não foi aceito. Escolha outro horário.</p>
+          @if (statusView(); as view) {
+            <h2>{{ view.heading }}</h2>
+            <p>{{ view.message }}</p>
+            <div class="booking-row">
+              <span>{{ view.effectiveLabel }}</span>
+              <strong data-testid="effective-interval">{{ view.effective }}</strong>
+            </div>
+            @if (view.pendingNote) {
+              <p>{{ view.pendingNote }}</p>
+            }
+            @if (view.requested) {
+              <div class="booking-row">
+                <span>Horário originalmente solicitado</span>
+                <strong data-testid="requested-interval">{{ view.requested }}</strong>
+              </div>
+            }
+            @if (view.prestadorName) {
+              <div class="booking-row"><span>Profissional</span><strong>{{ view.prestadorName }}</strong></div>
+            }
+            @if (view.locationName) {
+              <div class="booking-row"><span>Local</span><strong>{{ view.locationName }}</strong></div>
+            }
+            @if (view.duration !== null) {
+              <div class="booking-row"><span>Duração</span><strong>{{ view.duration }} min</strong></div>
+            }
+            @if (view.price !== null) {
+              <div class="booking-row"><span>{{ view.priceLabel }}</span><strong>{{ formatCurrency(view.price) }}</strong></div>
+            }
+            @if (view.holdActive && view.holdExpiresAt) {
+              <p>Horário reservado temporariamente até {{ view.holdExpiresAt }}.</p>
+            }
           }
           <button type="button" class="booking-button" (click)="refreshPublicStatus()">Atualizar status</button>
           <button type="button" class="booking-button" (click)="startNewBooking()">Fazer novo agendamento</button>
@@ -51,8 +76,17 @@
           </div>
           <div class="booking-row">
             <span>Data e horário</span>
-            <strong>{{ formatSlotTime(store.result()!.startUtc) }}</strong>
+            <strong data-testid="result-interval">{{ formatSlotTime(store.result()!.startUtc) }} – {{ formatTime(store.result()!.endUtc) }}</strong>
           </div>
+          @if (store.selectedSlot(); as chosen) {
+            @if (chosen.prestadorName) {
+              <div class="booking-row"><span>Profissional</span><strong>{{ chosen.prestadorName }}</strong></div>
+            }
+            @if (chosen.executionLocationName) {
+              <div class="booking-row"><span>Local</span><strong>{{ chosen.executionLocationName }}</strong></div>
+            }
+            <div class="booking-row"><span>Duração</span><strong>{{ chosen.durationMinutes }} min</strong></div>
+          }
           <div class="booking-row booking-row--total">
             <span>Valor</span>
             <strong>{{ formatCurrency(store.result()!.price) }}</strong>
@@ -107,6 +141,12 @@
             <p>Horários sujeitos a confirmação — outra pessoa pode reservar antes de você.</p>
           </div>
 
+          <div class="booking-week-nav" aria-label="Navegação de datas">
+            <button type="button" class="booking-button" [disabled]="!canGoPrevious() || store.loading()" (click)="previousWeek()">Semana anterior</button>
+            <button type="button" class="booking-button" [disabled]="store.loading()" (click)="nextWeek()">Próxima semana</button>
+          </div>
+          <p class="booking-timezone-note">Horários no fuso {{ timeZone() }}.</p>
+
           @if (store.availabilityError()) {
             <div class="booking-state booking-state--error" role="alert" data-testid="availability-error">
               {{ store.availabilityError()!.message }}
@@ -117,18 +157,24 @@
           } @else if (!store.availabilityItems().length) {
             <div class="booking-state">Nenhum horário disponível nos próximos dias.</div>
           } @else {
-            <div class="booking-slot-grid">
-              @for (slot of store.availabilityItems(); track slot.startUtc + '-' + slot.prestadorId) {
-                <button
-                  type="button"
-                  class="booking-slot"
-                  [class.booking-slot--selected]="store.selectedSlot() === slot"
-                  (click)="selectSlot(slot)"
-                >
-                  {{ formatSlotTime(slot.startUtc) }}
-                </button>
-              }
-            </div>
+            @for (group of slotGroups(); track group.key) {
+              <h3 class="booking-day-heading" data-testid="day-heading">{{ group.heading }}</h3>
+              <div class="booking-slot-grid">
+                @for (slot of group.slots; track slotKey(slot)) {
+                  <button
+                    type="button"
+                    class="booking-slot"
+                    [class.booking-slot--selected]="isSelected(slot)"
+                    (click)="selectSlot(slot)"
+                  >
+                    <strong>{{ formatTime(slot.startUtc) }} – {{ formatTime(slot.endUtc) }}</strong>
+                    @if (slot.prestadorName) { <small>{{ slot.prestadorName }}</small> }
+                    @if (slot.executionLocationName) { <small>{{ slot.executionLocationName }}</small> }
+                    <small>{{ slot.durationMinutes }} min · {{ formatCurrency(slot.currentPrice) }}</small>
+                  </button>
+                }
+              </div>
+            }
           }
         }
 
@@ -136,7 +182,18 @@
           <div class="booking-state booking-state--error" role="alert">{{ store.submitError()!.message }}</div>
         }
 
-        @if (store.selectedSlot()) {
+        @if (store.selectedSlot(); as chosen) {
+          <section class="booking-summary-card" data-testid="selection-review">
+            <h3>Revise o horário escolhido</h3>
+            <div class="booking-row"><span>Serviço</span><strong>{{ chosen.serviceLabel }}</strong></div>
+            <div class="booking-row"><span>Data</span><strong>{{ formatDay(chosen.startUtc) }}</strong></div>
+            <div class="booking-row"><span>Início – término</span><strong>{{ formatTime(chosen.startUtc) }} – {{ formatTime(chosen.endUtc) }}</strong></div>
+            <div class="booking-row"><span>Duração</span><strong>{{ chosen.durationMinutes }} min</strong></div>
+            @if (chosen.prestadorName) { <div class="booking-row"><span>Profissional</span><strong>{{ chosen.prestadorName }}</strong></div> }
+            @if (chosen.executionLocationName) { <div class="booking-row"><span>Local</span><strong>{{ chosen.executionLocationName }}</strong></div> }
+            <div class="booking-row"><span>Fuso horário</span><strong>{{ timeZone() }}</strong></div>
+            <div class="booking-row booking-row--total"><span>Valor</span><strong>{{ formatCurrency(chosen.currentPrice) }}</strong></div>
+          </section>
           <div class="booking-title">
             <h2>SEUS DADOS</h2>
             <p>Informe nome e telefone para reservar seu horário.</p>
