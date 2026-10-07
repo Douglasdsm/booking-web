@@ -6,12 +6,15 @@ import { API_CONFIG, ApiConfig } from '../../core/api/api.config';
 import { AvisosPage } from './avisos.page';
 
 const apiConfig = { baseUrl: 'https://api.test', endpoints: {} } as unknown as ApiConfig;
-const reconfirmation = { id: 1, eventType: 'BookingReconfirmationRequired', causeType: 'BookingReconfirmation', causeId: 5, createdAtUtc: '2026-10-01T10:00:00Z', isRead: false, readAtUtc: null };
-const opportunity = { id: 2, eventType: 'BookingOpportunityOffered', causeType: 'BookingOpportunity', causeId: 9, createdAtUtc: '2026-10-01T11:00:00Z', isRead: false, readAtUtc: null };
-const other = { id: 3, eventType: 'BookingCancelled', causeType: 'BookingCancellation', causeId: 1, createdAtUtc: '2026-10-01T09:00:00Z', isRead: false, readAtUtc: null };
-const offered = (status: string) => ({ id: 9, waitlistEntryId: 3, executionEsusId: 13, executionLocationId: 9, prestadorId: 7, startUtc: '2026-10-02T14:00:00Z', endUtc: '2026-10-02T14:30:00Z', status, expiresAtUtc: '2026-10-02T15:00:00Z' });
+const base = 'https://api.test';
 
-describe('AvisosPage', () => {
+const reconfirmation = (over: object = {}) => ({ id: 5, bookingId: 41, status: 'Requested', requestedAtUtc: '2026-10-01T10:00:00Z', deadlineUtc: '2026-10-02T12:00:00Z', respondedAtUtc: null, bookingStartUtc: '2026-10-03T14:00:00Z', canRespond: true, ...over });
+const opportunity = (over: object = {}) => ({ id: 9, waitlistEntryId: 3, executionEsusId: 13, executionLocationId: 9, prestadorId: 7, startUtc: '2026-10-02T14:00:00Z', endUtc: '2026-10-02T14:30:00Z', status: 'Offered', expiresAtUtc: '2026-10-02T15:00:00Z', ...over });
+const waitlist = (over: object = {}) => ({ id: 8, bookingId: 41, requesterUsuarioId: 20, serviceOfferId: 5, executionEsusId: 13, prestadorId: null, executionLocationId: null, status: 'Active', ...over });
+const booking = (over: object = {}) => ({ bookingId: 41, startUtc: '2026-10-03T14:00:00Z', endUtc: '2026-10-03T14:30:00Z', currentState: 'Active', serviceLabel: 'Corte', prestadorId: 7, executionEsusId: 13, executionLocationId: 9, hasServiceOrder: false, predecessorBookingId: null, successorBookingId: null, successorReason: null, ...over });
+const bookings = (items: unknown[]) => ({ page: 1, pageSize: 50, totalItems: items.length, items });
+
+describe('AvisosPage (canonical state, notification-independent)', () => {
   let fixture: ComponentFixture<AvisosPage>;
   let http: HttpTestingController;
   beforeEach(async () => {
@@ -21,60 +24,102 @@ describe('AvisosPage', () => {
   });
   afterEach(() => http.verify());
 
-  function load(items: unknown[]): void {
+  function load(state: { reconfirmations?: unknown[]; opportunities?: unknown[]; waitlist?: unknown[]; bookings?: unknown[] }): void {
     fixture.detectChanges();
-    http.expectOne((r) => r.url === 'https://api.test/v2/notifications').flush(items);
+    http.expectOne(`${base}/v2/me/booking-reconfirmations`).flush(state.reconfirmations ?? []);
+    http.expectOne(`${base}/v2/me/booking-opportunities`).flush(state.opportunities ?? []);
+    http.expectOne(`${base}/v2/me/booking-waitlist`).flush(state.waitlist ?? []);
+    http.expectOne((r) => r.url === `${base}/v2/me/bookings`).flush(bookings(state.bookings ?? []));
     fixture.detectChanges();
   }
-  function button(label: string): HTMLButtonElement | null {
-    return [...fixture.nativeElement.querySelectorAll('button')].find((b: HTMLButtonElement) => b.textContent?.includes(label)) ?? null;
+  function reloadAll(state: { reconfirmations?: unknown[]; opportunities?: unknown[]; waitlist?: unknown[]; bookings?: unknown[] }): void {
+    http.expectOne(`${base}/v2/me/booking-reconfirmations`).flush(state.reconfirmations ?? []);
+    http.expectOne(`${base}/v2/me/booking-opportunities`).flush(state.opportunities ?? []);
+    http.expectOne(`${base}/v2/me/booking-waitlist`).flush(state.waitlist ?? []);
+    http.expectOne((r) => r.url === `${base}/v2/me/bookings`).flush(bookings(state.bookings ?? []));
+    fixture.detectChanges();
   }
+  const button = (label: string): HTMLButtonElement | null =>
+    [...fixture.nativeElement.querySelectorAll('button')].find((b: HTMLButtonElement) => b.textContent?.includes(label)) ?? null;
+  const text = (): string => fixture.nativeElement.textContent as string;
 
-  it('shows only actionable notifications and the authoritative opportunity detail', () => {
-    load([reconfirmation, opportunity, other]);
-    http.expectOne('https://api.test/v2/booking-opportunities/9').flush(offered('Offered'));
-    fixture.detectChanges();
-    const text = fixture.nativeElement.textContent as string;
-    expect(text).toContain('Reconfirmação solicitada');
-    expect(text).toContain('Vaga disponível');
-    expect(text).not.toContain('BookingCancelled');
+  it('rebuilds reconfirmation and opportunity from backend state alone, showing the real deadline', () => {
+    load({ reconfirmations: [reconfirmation()], opportunities: [opportunity()] });
+    expect(text()).toContain('Reconfirmação solicitada');
+    expect(text()).toContain('02/10/2026 12:00');
+    expect(text()).toContain('Vaga disponível');
+    expect(button('Confirmar presença')).not.toBeNull();
     expect(button('Aceitar vaga')).not.toBeNull();
   });
 
-  it('confirms a reconfirmation once, marks it read and reloads server truth', () => {
-    load([reconfirmation]);
+  it('shows actions only when the backend says the item is actionable', () => {
+    load({ reconfirmations: [reconfirmation({ status: 'Expired', canRespond: false }), reconfirmation({ id: 6, status: 'Confirmed', canRespond: false })], opportunities: [opportunity({ status: 'Expired' })] });
+    expect(button('Confirmar presença')).toBeNull();
+    expect(button('Aceitar vaga')).toBeNull();
+    expect(text()).toContain('Expired');
+    expect(text()).toContain('Confirmed');
+  });
+
+  it('confirms once, then reloads canonical state', () => {
+    load({ reconfirmations: [reconfirmation()] });
     button('Confirmar presença')!.click();
     button('Confirmar presença')?.click();
-    const respond = http.expectOne('https://api.test/v2/bookings/reconfirmations/5/respond');
+    const respond = http.expectOne(`${base}/v2/bookings/reconfirmations/5/respond`);
     expect(respond.request.body).toEqual({ confirmed: true });
-    respond.flush({ id: 5, status: 'Confirmed' });
-    http.expectOne('https://api.test/v2/notifications/1/read').flush(null);
-    http.expectOne((r) => r.url === 'https://api.test/v2/notifications').flush([{ ...reconfirmation, isRead: true }]);
-    fixture.detectChanges();
+    respond.flush({});
+    reloadAll({ reconfirmations: [reconfirmation({ status: 'Confirmed', canRespond: false })] });
     expect(button('Confirmar presença')).toBeNull();
-    expect(fixture.nativeElement.textContent).toContain('Respondido');
+    expect(text()).toContain('Confirmed');
   });
 
-  it('keeps a backend error visible and does not mark the notification read', () => {
-    load([reconfirmation]);
+  it('keeps the backend error visible and reloads authoritative state', () => {
+    load({ reconfirmations: [reconfirmation()] });
     button('Não poderei comparecer')!.click();
-    http.expectOne('https://api.test/v2/bookings/reconfirmations/5/respond').flush({ errors: ['CONFIGURATION CONFLICT: prazo de reconfirmação expirado.'] }, { status: 409, statusText: 'Conflict' });
-    http.expectOne((r) => r.url === 'https://api.test/v2/notifications').flush([reconfirmation]);
-    fixture.detectChanges();
+    http.expectOne(`${base}/v2/bookings/reconfirmations/5/respond`).flush({ errors: ['CONFIGURATION CONFLICT: prazo de reconfirmação expirado.'] }, { status: 409, statusText: 'Conflict' });
+    reloadAll({ reconfirmations: [reconfirmation({ status: 'Expired', canRespond: false })] });
     expect((fixture.nativeElement.querySelector('[role="alert"]') as HTMLElement).textContent).toContain('prazo de reconfirmação expirado');
+    expect(button('Não poderei comparecer')).toBeNull();
   });
 
-  it('accepts an opportunity and then shows the refreshed terminal status without actions', () => {
-    load([opportunity]);
-    http.expectOne('https://api.test/v2/booking-opportunities/9').flush(offered('Offered'));
-    fixture.detectChanges();
+  it('accepts an opportunity and reflects the refreshed status', () => {
+    load({ opportunities: [opportunity()] });
     button('Aceitar vaga')!.click();
-    http.expectOne('https://api.test/v2/booking-opportunities/9/accept').flush({ id: 77 });
-    http.expectOne('https://api.test/v2/notifications/2/read').flush(null);
-    http.expectOne((r) => r.url === 'https://api.test/v2/notifications').flush([{ ...opportunity, isRead: true }]);
-    http.expectOne('https://api.test/v2/booking-opportunities/9').flush(offered('Consumed'));
-    fixture.detectChanges();
+    http.expectOne(`${base}/v2/booking-opportunities/9/accept`).flush({ id: 77 });
+    reloadAll({ opportunities: [opportunity({ status: 'Consumed' })] });
     expect(button('Aceitar vaga')).toBeNull();
-    expect(fixture.nativeElement.textContent).toContain('Consumed');
+    expect(text()).toContain('Consumed');
+  });
+
+  it('offers the waitlist only for upcoming Active own bookings and recovers an existing entry after reload', () => {
+    load({ bookings: [booking(), booking({ bookingId: 42, currentState: 'Cancelled' })], waitlist: [waitlist()] });
+    expect(button('Entrar na lista de espera')).toBeNull();
+    expect(button('Sair da lista de espera')).not.toBeNull();
+    expect(text()).toContain('Booking #41');
+    expect(text()).not.toContain('Booking #42');
+  });
+
+  it('joins the waitlist and then leaves it using the recovered entry id', () => {
+    load({ bookings: [booking()] });
+    button('Entrar na lista de espera')!.click();
+    button('Entrar na lista de espera')?.click();
+    const join = http.expectOne(`${base}/v2/booking-waitlist`);
+    expect(join.request.body).toEqual({ bookingId: 41 });
+    join.flush(waitlist());
+    reloadAll({ bookings: [booking()], waitlist: [waitlist()] });
+    expect(button('Sair da lista de espera')).not.toBeNull();
+    button('Sair da lista de espera')!.click();
+    http.expectOne(`${base}/v2/booking-waitlist/8`).flush(null);
+    reloadAll({ bookings: [booking()], waitlist: [waitlist({ status: 'Cancelled' })] });
+    expect(button('Entrar na lista de espera')).not.toBeNull();
+    expect(text()).toContain('Cancelled');
+  });
+
+  it('shows the backend error when joining the waitlist fails', () => {
+    load({ bookings: [booking()] });
+    button('Entrar na lista de espera')!.click();
+    http.expectOne(`${base}/v2/booking-waitlist`).flush({ errors: ['CONFIGURATION CONFLICT: já existe uma WaitlistEntry ativa para este Booking.'] }, { status: 409, statusText: 'Conflict' });
+    reloadAll({ bookings: [booking()], waitlist: [waitlist()] });
+    expect((fixture.nativeElement.querySelector('[role="alert"]') as HTMLElement).textContent).toContain('WaitlistEntry ativa');
+    expect(button('Sair da lista de espera')).not.toBeNull();
   });
 });
