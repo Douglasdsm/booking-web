@@ -11,6 +11,8 @@ export interface PublicEsusProfile {
   tipo: string;
   publicBookingEnabled: boolean;
   timeZoneId?: string | null;
+  /** V2-MC-04: the receiving company, named in the data-use notice. */
+  receivingCompanyName?: string | null;
 }
 
 // ---- GET /v2/public/esus/{esusId}/service-offers ----
@@ -95,6 +97,8 @@ export interface SubmitPublicBookingRequest {
   requestedStartUtc: string;
   visitorName: string;
   visitorPhone: string;
+  /** V2-MC-04: optional, independent of the booking; always sent explicitly (false unless the visitor opted in). */
+  marketingOptIn?: boolean;
 }
 
 export type PublicBookingSubmissionStatus = 'Confirmed' | 'PendingApproval';

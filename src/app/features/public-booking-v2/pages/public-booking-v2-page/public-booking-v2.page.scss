@@ -1,3 +1,33 @@
 :host {
   display: block;
 }
+
+.booking-notice {
+  margin: 12px 0;
+  padding: 12px 14px;
+  border: 1px solid rgba(128, 128, 128, 0.35);
+  border-radius: 8px;
+  font-size: 0.9rem;
+
+  p {
+    margin: 6px 0 0;
+  }
+
+  a {
+    display: inline-block;
+    margin-top: 8px;
+    text-decoration: underline;
+  }
+}
+
+.booking-field--check {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 12px 0;
+  font-size: 0.9rem;
+
+  input {
+    margin-top: 3px;
+  }
+}

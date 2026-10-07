@@ -49,6 +49,14 @@
               <p>Horário reservado temporariamente até {{ view.holdExpiresAt }}.</p>
             }
           }
+          <section class="booking-notice" data-testid="optional-account">
+            <strong>Criar uma conta é opcional</strong>
+            <p>
+              Seu agendamento já está feito sem conta. Se quiser, você pode criar uma conta depois; ela não vincula nem importa
+              este agendamento automaticamente.
+            </p>
+            <a routerLink="/cadastrar">Criar conta (opcional)</a>
+          </section>
           <button type="button" class="booking-button" (click)="refreshPublicStatus()">Atualizar status</button>
           <button type="button" class="booking-button" (click)="startNewBooking()">Fazer novo agendamento</button>
         </section>
@@ -91,6 +99,15 @@
             <span>Valor</span>
             <strong>{{ formatCurrency(store.result()!.price) }}</strong>
           </div>
+        </section>
+
+        <section class="booking-notice" data-testid="optional-account">
+          <strong>Criar uma conta é opcional</strong>
+          <p>
+            Seu agendamento já está feito sem conta. Se quiser, você pode criar uma conta depois; ela não vincula nem importa
+            este agendamento automaticamente.
+          </p>
+          <a routerLink="/cadastrar">Criar conta (opcional)</a>
         </section>
 
         @if (store.result()!.status === 'PendingApproval' && store.result()!.publicStatusToken) {
@@ -228,6 +245,25 @@
               />
             </label>
           </form>
+
+          <aside class="booking-notice" data-testid="privacy-notice">
+            <strong>Uso dos seus dados</strong>
+            <p>
+              Seu nome e telefone serão usados apenas para realizar e acompanhar este agendamento com
+              <strong>{{ store.esusProfile()?.receivingCompanyName || 'a empresa responsável' }}</strong>,
+              a empresa que receberá esses dados. Este aviso é informativo: não é preciso aceitar nada para agendar.
+            </p>
+          </aside>
+
+          <label class="booking-field booking-field--check">
+            <input
+              type="checkbox"
+              data-testid="marketing-optin"
+              [checked]="store.marketingOptIn()"
+              (change)="onMarketingChange($any($event.target).checked)"
+            />
+            <span>Quero receber comunicações de marketing de {{ store.esusProfile()?.receivingCompanyName || 'esta empresa' }} (opcional; não afeta o seu agendamento).</span>
+          </label>
 
           <button
             type="button"

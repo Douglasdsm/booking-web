@@ -39,6 +39,15 @@ export const serverRoutes: ServerRoute[] = [
     renderMode: RenderMode.Server
   },
   {
+    // V2-MC-04: authenticated, per-user pages that call the API — never prerendered.
+    path: 'minha-conta',
+    renderMode: RenderMode.Server
+  },
+  {
+    path: 'minha-conta/**',
+    renderMode: RenderMode.Server
+  },
+  {
     path: 'meus-agendamentos',
     renderMode: RenderMode.Server
   },

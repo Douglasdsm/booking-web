@@ -34,6 +34,11 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'minha-conta',
+    loadChildren: () =>
+      import('./features/minha-conta/minha-conta.routes').then((m) => m.MINHA_CONTA_ROUTES),
+  },
+  {
     path: 'reservar/:esusId',
     canActivate: [sessionRequiredGuard],
     loadComponent: () => import('./features/reserva-autenticada/reserva.page').then((m) => m.ReservaPage),

@@ -20,6 +20,7 @@ interface PublicBookingV2State {
   selectedSlot: BookingPreview | null;
   visitorName: string;
   visitorPhone: string;
+  marketingOptIn: boolean;
   submitStatus: PublicBookingV2SubmitStatus;
   result: PublicBookingSubmissionResult | null;
   submitError: PublicBookingError | null;
@@ -39,6 +40,7 @@ const initialState: PublicBookingV2State = {
   selectedSlot: null,
   visitorName: '',
   visitorPhone: '',
+  marketingOptIn: false,
   submitStatus: 'idle',
   result: null,
   submitError: null,
@@ -67,6 +69,7 @@ export class PublicBookingV2Store {
   readonly selectedSlot = computed(() => this.state().selectedSlot);
   readonly visitorName = computed(() => this.state().visitorName);
   readonly visitorPhone = computed(() => this.state().visitorPhone);
+  readonly marketingOptIn = computed(() => this.state().marketingOptIn);
   readonly submitStatus = computed(() => this.state().submitStatus);
   readonly result = computed(() => this.state().result);
   readonly submitError = computed(() => this.state().submitError);
@@ -114,6 +117,10 @@ export class PublicBookingV2Store {
 
   setVisitorPhone(visitorPhone: string): void {
     this.patch({ visitorPhone });
+  }
+
+  setMarketingOptIn(marketingOptIn: boolean): void {
+    this.patch({ marketingOptIn });
   }
 
   setSubmitting(): void {

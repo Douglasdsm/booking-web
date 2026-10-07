@@ -1,6 +1,6 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, computed, inject, signal } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs/operators';
 
 import { BookingLayoutComponent } from '../../../booking/components/booking-layout/booking-layout.component';
@@ -26,7 +26,7 @@ const STATUS_TOKEN_STORAGE_PREFIX = 'public-booking-v2:status-token:';
  */
 @Component({
   selector: 'app-public-booking-v2-page',
-  imports: [BookingLayoutComponent],
+  imports: [BookingLayoutComponent, RouterLink],
   templateUrl: './public-booking-v2.page.html',
   styleUrl: './public-booking-v2.page.scss',
 })
@@ -179,6 +179,10 @@ export class PublicBookingV2Page {
     this.idempotency.next();
   }
 
+  protected onMarketingChange(checked: boolean): void {
+    this.store.setMarketingOptIn(checked);
+  }
+
   protected onPhoneInput(value: string): void {
     this.store.setVisitorPhone(value);
     this.idempotency.next();
@@ -207,6 +211,7 @@ export class PublicBookingV2Page {
           requestedStartUtc: slot.startUtc,
           visitorName,
           visitorPhone,
+          marketingOptIn: this.store.marketingOptIn(),
         },
         this.idempotency.current(),
       )
