@@ -1,0 +1,48 @@
+name: V2 Integration CI (no deploy)
+
+# CI only. Separate from deploy.yml and must never be wired to a deploy step: no SSH, no image build or
+# publish, no secrets, no remote host. The API contract test (needs a live OpenAPI document) is covered by
+# the dedicated E2E/contract pipeline; it is not run here because it requires the backend repository.
+on:
+  push:
+    branches: [v2-integration]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: booking-web-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npm test -- --watch=false
+
+      - name: Production build
+        run: npm run build -- --configuration production
+
+      - name: Scan production bundle
+        run: npm run scan:production
