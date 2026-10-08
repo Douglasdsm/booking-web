@@ -5,6 +5,7 @@ import {
   PublicBookingError,
   PublicBookingSubmissionResult,
   PublicBookingStatusResult,
+  ConditionsChangedDetails,
   PublicEsusProfile,
   PublicServiceOffer,
 } from '../models/public-booking-v2.models';
@@ -121,6 +122,18 @@ export class PublicBookingV2Store {
 
   setMarketingOptIn(marketingOptIn: boolean): void {
     this.patch({ marketingOptIn });
+  }
+
+  /**
+   * V2-MC-06 / F-12: the backend refused the submit because price/duration changed after the review. The reviewed candidate keeps
+   * its identity (professional, local, start) and only shows the values the backend just resolved; the visitor must confirm again.
+   * (The end instant shown here is start + the resolved duration, display only - the Booking's own end comes from the backend.)
+   */
+  applyChangedConditions(conditions: ConditionsChangedDetails): void {
+    const slot = this.state().selectedSlot;
+    if (!slot) return;
+    const endUtc = new Date(Date.parse(slot.startUtc) + conditions.currentDurationMinutes * 60_000).toISOString();
+    this.patch({ selectedSlot: { ...slot, currentPrice: conditions.currentPrice, durationMinutes: conditions.currentDurationMinutes, endUtc } });
   }
 
   setSubmitting(): void {

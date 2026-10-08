@@ -1,6 +1,6 @@
 import { HttpErrorResponse } from '@angular/common/http';
 
-import { ApiErrorBody, PublicBookingError, PublicBookingErrorKind } from '../models/public-booking-v2.models';
+import { ApiErrorBody, ConditionsChangedDetails, PublicBookingError, PublicBookingErrorKind } from '../models/public-booking-v2.models';
 
 /**
  * Phase 37: maps a raw HTTP failure into the small, closed set of error kinds the UI actually branches
@@ -11,9 +11,30 @@ import { ApiErrorBody, PublicBookingError, PublicBookingErrorKind } from '../mod
  */
 export function mapPublicBookingError(error: HttpErrorResponse): PublicBookingError {
   const serverMessage = extractMessages(error.error).join('\n');
+  const conditions = extractConditions(error);
+  if (conditions) {
+    return { kind: 'ConditionsChanged', message: userFacingMessage('ConditionsChanged', serverMessage), conditions };
+  }
   const kind = classify(error.status, serverMessage);
 
   return { kind, message: userFacingMessage(kind, serverMessage) };
+}
+
+/** V2-MC-06 / F-12: only the backend's structured 409 CONDITIONS_CHANGED is trusted - never inferred from message text. */
+function extractConditions(error: HttpErrorResponse): ConditionsChangedDetails | null {
+  if (error.status !== 409 || typeof error.error !== 'object' || error.error === null) return null;
+  const body = error.error as Partial<ApiErrorBody>;
+  if (body.code !== 'CONDITIONS_CHANGED' || typeof body.details !== 'object' || body.details === null) return null;
+  const details = body.details as Partial<ConditionsChangedDetails>;
+  if (typeof details.currentPrice !== 'number' || typeof details.currentDurationMinutes !== 'number') return null;
+  return {
+    expectedPrice: details.expectedPrice ?? null,
+    currentPrice: details.currentPrice,
+    expectedDurationMinutes: details.expectedDurationMinutes ?? null,
+    currentDurationMinutes: details.currentDurationMinutes,
+    priceChanged: details.priceChanged === true,
+    durationChanged: details.durationChanged === true,
+  };
 }
 
 function extractMessages(body: unknown): string[] {
@@ -63,6 +84,8 @@ function classify(status: number, serverMessage: string): PublicBookingErrorKind
 
 function userFacingMessage(kind: PublicBookingErrorKind, serverMessage: string): string {
   switch (kind) {
+    case 'ConditionsChanged':
+      return 'O preço ou a duração mudaram desde a sua revisão. Nada foi reservado; revise os novos valores e confirme novamente.';
     case 'PublicBookingDisabled':
       return 'Agendamento online indisponível.';
     case 'ServiceUnavailable':

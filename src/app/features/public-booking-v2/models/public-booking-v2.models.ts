@@ -97,6 +97,9 @@ export interface SubmitPublicBookingRequest {
   requestedStartUtc: string;
   visitorName: string;
   visitorPhone: string;
+  /** V2-MC-06 / F-12: the REVIEWED price/duration, declared only as an expectation (the backend stays the authority). */
+  expectedPrice?: number;
+  expectedDurationMinutes?: number;
   /** V2-MC-04: optional, independent of the booking; always sent explicitly (false unless the visitor opted in). */
   marketingOptIn?: boolean;
 }
@@ -119,6 +122,19 @@ export interface PublicBookingSubmissionResult {
 export interface ApiErrorBody {
   errors: string[];
   tokenExpired: boolean;
+  /** V2-MC-06: machine-readable code (e.g. CONDITIONS_CHANGED) when the backend provides one. */
+  code?: string;
+  details?: unknown;
+}
+
+/** V2-MC-06 / F-12: structured details of a 409 CONDITIONS_CHANGED — what was reviewed vs. what the backend resolved now. */
+export interface ConditionsChangedDetails {
+  expectedPrice?: number | null;
+  currentPrice: number;
+  expectedDurationMinutes?: number | null;
+  currentDurationMinutes: number;
+  priceChanged: boolean;
+  durationChanged: boolean;
 }
 
 /**
@@ -130,6 +146,7 @@ export interface ApiErrorBody {
  * triggered by the current backend).
  */
 export type PublicBookingErrorKind =
+  | 'ConditionsChanged'
   | 'PublicBookingDisabled'
   | 'ServiceUnavailable'
   | 'SlotUnavailable'
@@ -143,4 +160,6 @@ export type PublicBookingErrorKind =
 export interface PublicBookingError {
   kind: PublicBookingErrorKind;
   message: string;
+  /** Present only for kind = ConditionsChanged. */
+  conditions?: ConditionsChangedDetails;
 }

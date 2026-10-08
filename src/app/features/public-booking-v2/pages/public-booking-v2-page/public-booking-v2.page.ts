@@ -212,6 +212,8 @@ export class PublicBookingV2Page {
           visitorName,
           visitorPhone,
           marketingOptIn: this.store.marketingOptIn(),
+          expectedPrice: slot.currentPrice,
+          expectedDurationMinutes: slot.durationMinutes,
         },
         this.idempotency.current(),
       )
@@ -226,6 +228,12 @@ export class PublicBookingV2Page {
         error: (error: HttpErrorResponse) => {
           const mapped = mapPublicBookingError(error);
           this.store.setSubmitError(mapped);
+
+          // V2-MC-06 / F-12: price/duration changed after the review - show the new values and ask for a NEW confirmation (never resubmit).
+          if (mapped.kind === 'ConditionsChanged' && mapped.conditions) {
+            this.store.applyChangedConditions(mapped.conditions);
+            return;
+          }
 
           // Slot conflict: the stale candidate must never be silently resubmitted or auto-replaced
           // (plan §"CONCORRÊNCIA NORMAL" — "não escolher outro horário sozinho"). Refresh the list so

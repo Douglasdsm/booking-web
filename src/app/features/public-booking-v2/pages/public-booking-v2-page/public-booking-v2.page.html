@@ -195,7 +195,15 @@
           }
         }
 
-        @if (store.submitStatus() === 'error' && store.submitError()) {
+        @if (store.submitStatus() === 'error' && store.submitError()?.kind === 'ConditionsChanged' && store.submitError()!.conditions; as changed) {
+          <div class="booking-state booking-state--error" role="alert" data-testid="conditions-changed">
+            <strong>{{ store.submitError()!.message }}</strong>
+            <ul>
+              @if (changed.priceChanged) { <li>Preço: {{ formatCurrency(changed.expectedPrice ?? 0) }} → <strong>{{ formatCurrency(changed.currentPrice) }}</strong></li> }
+              @if (changed.durationChanged) { <li>Duração: {{ changed.expectedDurationMinutes }} min → <strong>{{ changed.currentDurationMinutes }} min</strong></li> }
+            </ul>
+          </div>
+        } @else if (store.submitStatus() === 'error' && store.submitError()) {
           <div class="booking-state booking-state--error" role="alert">{{ store.submitError()!.message }}</div>
         }
 
