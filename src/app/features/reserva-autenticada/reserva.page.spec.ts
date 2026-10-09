@@ -87,6 +87,53 @@ describe('ReservaPage (authenticated Hold, V2-MC-02A)', () => {
     expect(button('Confirmar reserva')).toBeDefined();
   });
 
+  describe('availability anchoring (V2-FIX-UJ-03)', () => {
+    function openOfferBeforeProfile(zone: string, now: string): { search: () => ReturnType<HttpTestingController['expectOne']> } {
+      vi.useFakeTimers({ now: new Date(now), toFake: ['Date', 'setInterval', 'clearInterval', 'setTimeout', 'clearTimeout'] });
+      fixture.detectChanges();
+      const profileRequest = http.expectOne(`${base}/v2/public/esus/42`);
+      http.expectOne(`${base}/v2/public/esus/42/service-offers`).flush({ serviceOffers: [offer] });
+      http.expectOne(`${base}/v2/me/booking-holds`).flush([]);
+      fixture.detectChanges();
+      button('Corte')!.click(); // the service is chosen while the company profile is still on its way
+      fixture.detectChanges();
+      http.expectNone((r) => r.url.includes('/availability/search')); // INV-UJ03-02: no provisional search
+      expect(text()).toContain('Carregando horários');
+      profileRequest.flush({ ...profile, timeZoneId: zone });
+      return { search: () => http.expectOne((r) => r.url === `${base}/v2/esus/42/availability/search`) };
+    }
+
+    it('sends the first search only after the profile, on the company day (21:00 in America/Cuiaba is already the next UTC day)', () => {
+      const { search } = openOfferBeforeProfile('America/Cuiaba', '2026-10-11T01:00:00Z');
+      const first = search();
+      expect(first.request.params.get('StartDate')).toBe('2026-10-10'); // INV-UJ03-01
+      expect(first.request.params.get('EndDate')).toBe('2026-10-17');
+      first.flush(availability([]));
+    });
+
+    it('week navigation is calendar arithmetic on the business day and returns exactly to the first day', () => {
+      const { search } = openOfferBeforeProfile('America/Cuiaba', '2026-10-11T03:59:00Z'); // 23:59 local
+      search().flush(availability([]));
+      fixture.detectChanges();
+      button('Próxima semana')!.click();
+      const next = search();
+      expect(next.request.params.get('StartDate')).toBe('2026-10-17');
+      next.flush(availability([]));
+      fixture.detectChanges();
+      button('Semana anterior')!.click();
+      const back = search();
+      expect(back.request.params.get('StartDate')).toBe('2026-10-10'); // INV-UJ03-05
+      back.flush(availability([]));
+    });
+
+    it('is generic: a company ahead of UTC anchors to its own day (00:30 in Pacific/Auckland is still the previous UTC day)', () => {
+      const { search } = openOfferBeforeProfile('Pacific/Auckland', '2026-10-10T11:30:00Z'); // 2026-10-11 00:30 local
+      const first = search();
+      expect(first.request.params.get('StartDate')).toBe('2026-10-11'); // INV-UJ03-06
+      first.flush(availability([]));
+    });
+  });
+
   it('recognizes an expired Hold from backend state, offers no confirmation and lets the customer choose again', () => {
     boot([hold({ status: 'Expired', canConfirm: false, expiresAtUtc: '2027-01-01T09:59:00Z' })]);
     expect(text()).toContain('Sua reserva expirou');
