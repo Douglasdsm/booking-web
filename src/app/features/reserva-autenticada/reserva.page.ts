@@ -3,6 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import { finalize, Observable } from 'rxjs';
 
 import { extractApiErrorMessage } from '../auth-publica/utils/public-auth-utils';
+import { addDays, businessToday } from './business-date';
 import { Candidato, EsusPerfil, MeuHold, Oferta, ReservaService } from './reserva.service';
 
 const WINDOW_DAYS = 7;
@@ -57,11 +58,11 @@ const WINDOW_DAYS = 7;
             }
             @if (selectedOffer()) {
               <div class="booking-week-nav" aria-label="Navegação de datas">
-                <button type="button" class="booking-button" [disabled]="weekOffset() === 0 || busy()" (click)="changeWeek(-1)">Semana anterior</button>
-                <button type="button" class="booking-button" [disabled]="busy()" (click)="changeWeek(1)">Próxima semana</button>
+                <button type="button" class="booking-button" [disabled]="weekOffset() === 0 || busy() || awaitingProfile()" (click)="changeWeek(-1)">Semana anterior</button>
+                <button type="button" class="booking-button" [disabled]="busy() || awaitingProfile()" (click)="changeWeek(1)">Próxima semana</button>
               </div>
-              <p class="booking-timezone-note">Horários no fuso {{ timeZone() }}.</p>
-              @if (!slots().length && !loading()) { <p>Nenhum horário disponível nesta semana.</p> }
+              @if (awaitingProfile()) { <p>Carregando horários...</p> } @else { <p class="booking-timezone-note">Horários no fuso {{ timeZone() }}.</p> }
+              @if (!slots().length && !loading() && !awaitingProfile()) { <p>Nenhum horário disponível nesta semana.</p> }
               @for (group of groups(); track group.key) {
                 <h3 class="booking-day-heading" data-testid="day-heading">{{ group.heading }}</h3>
                 <div class="booking-slot-grid">
@@ -117,7 +118,10 @@ export class ReservaPage implements OnInit {
   private readonly now = signal(Date.now());
   private clockOffsetMs = 0;
 
+  /** Only used to print dates; availability is never searched before the profile (and therefore the timezone) is known. */
   readonly timeZone = computed(() => this.profile()?.timeZoneId ?? 'UTC');
+  /** A service is chosen but the company timezone has not arrived: the availability state is "loading", no search is sent yet. */
+  readonly awaitingProfile = computed(() => !!this.selectedOffer() && !this.profile());
   readonly currentHold = computed(() => {
     const hold = this.holds().find((item) => item.executionEsusId === this.esusId);
     if (!hold) return null;
@@ -152,7 +156,7 @@ export class ReservaPage implements OnInit {
     this.tick = setInterval(() => this.onTick(), 1000);
     this.destroyRef.onDestroy(() => { if (this.tick) clearInterval(this.tick); });
     this.loading.set(true);
-    this.api.getProfile(this.esusId).subscribe({ next: (p) => this.profile.set(p), error: (e: unknown) => this.fail(e, 'Não foi possível carregar o estabelecimento.') });
+    this.api.getProfile(this.esusId).subscribe({ next: (p) => { this.profile.set(p); if (this.selectedOffer()) this.loadSlots(); }, error: (e: unknown) => this.fail(e, 'Não foi possível carregar o estabelecimento.') });
     this.api.getOffers(this.esusId).pipe(finalize(() => this.loading.set(false))).subscribe({
       next: (r) => this.offers.set(r.serviceOffers ?? []),
       error: (e: unknown) => this.fail(e, 'Não foi possível carregar os serviços.'),
@@ -225,15 +229,14 @@ export class ReservaPage implements OnInit {
 
   private loadSlots(): void {
     const offer = this.selectedOffer();
-    if (!offer) return;
+    const profile = this.profile();
+    if (!offer || !profile) return; // no provisional date: the search is sent once the profile arrives (see the profile subscription)
     const version = ++this.availabilityVersion;
-    const start = new Date();
-    start.setUTCDate(start.getUTCDate() + this.weekOffset() * WINDOW_DAYS);
-    const end = new Date(start);
-    end.setUTCDate(end.getUTCDate() + WINDOW_DAYS);
-    const date = (d: Date) => new Intl.DateTimeFormat('en-CA', { timeZone: this.timeZone() }).format(d);
+    // BusinessToday = today in the company timezone; weeks are calendar arithmetic on that date.
+    const start = addDays(businessToday(profile.timeZoneId ?? 'UTC'), this.weekOffset() * WINDOW_DAYS);
+    const end = addDays(start, WINDOW_DAYS);
     this.loading.set(true);
-    this.api.searchAvailability(this.esusId, offer.id, date(start), date(end)).pipe(finalize(() => this.loading.set(false))).subscribe({
+    this.api.searchAvailability(this.esusId, offer.id, start, end).pipe(finalize(() => this.loading.set(false))).subscribe({
       next: (r) => { if (version === this.availabilityVersion) this.slots.set(r.items ?? []); },
       error: (e: unknown) => { if (version === this.availabilityVersion) this.fail(e, 'Não foi possível buscar horários.'); },
     });
