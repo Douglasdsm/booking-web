@@ -120,7 +120,7 @@ describe('LoginPage', () => {
       tokens: { accessToken: 'new-user-token' },
     });
 
-    expect(navigateSpy).toHaveBeenCalledWith('/agendar/demo');
+    expect(navigateSpy).toHaveBeenCalledWith('/minha-conta');
   });
 
   it('redirects temporary username accounts to username definition using the same token', async () => {
@@ -154,7 +154,7 @@ describe('LoginPage', () => {
       tokens: { accessToken: 'new-user-token' },
     });
 
-    expect(navigateSpy).toHaveBeenCalledWith('/agendar/demo');
+    expect(navigateSpy).toHaveBeenCalledWith('/minha-conta');
   });
 
   function fillLogin(user: string, senha: string): void {

@@ -208,8 +208,8 @@
         }
 
         @if (store.selectedSlot(); as chosen) {
-          <section class="booking-summary-card" data-testid="selection-review">
-            <h3>Revise o horário escolhido</h3>
+          <section class="booking-summary-card" data-testid="selection-review" tabindex="-1" aria-labelledby="selection-review-title">
+            <h3 id="selection-review-title">Revise o horário escolhido</h3>
             <div class="booking-row"><span>Serviço</span><strong>{{ chosen.serviceLabel }}</strong></div>
             <div class="booking-row"><span>Data</span><strong>{{ formatDay(chosen.startUtc) }}</strong></div>
             <div class="booking-row"><span>Início – término</span><strong>{{ formatTime(chosen.startUtc) }} – {{ formatTime(chosen.endUtc) }}</strong></div>

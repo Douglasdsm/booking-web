@@ -35,6 +35,8 @@ export const routes: Routes = [
   },
   {
     path: 'minha-conta',
+    // F-COV-28: the account area requires a session (it opened, empty, for anyone); the guard sends to /entrar with returnUrl
+    canActivate: [sessionRequiredGuard],
     loadChildren: () =>
       import('./features/minha-conta/minha-conta.routes').then((m) => m.MINHA_CONTA_ROUTES),
   },

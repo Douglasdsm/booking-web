@@ -42,3 +42,6 @@ __screenshots__/
 # System files
 .DS_Store
 Thumbs.db
+
+# MCP session artifacts (snapshots, screenshots) - never product
+/.playwright-mcp/

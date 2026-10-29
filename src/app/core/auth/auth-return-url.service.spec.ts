@@ -47,6 +47,18 @@ describe('AuthReturnUrlService', () => {
     expect(service.normalizeReturnUrl('/convite/token%3Fnext%3D%2Fadmin')).toBeNull();
   });
 
+  it('F-COV-24: accepts the protected pages a person is sent away from', () => {
+    for (const url of ['/meus-agendamentos', '/meus-avisos', '/minha-conta', '/minha-conta/dados', '/minha-conta/autorizacoes', '/minha-conta/agendamentos', '/minha-conta/marketing', '/reservar/42', '/agendar-v2/7']) {
+      expect(service.normalizeReturnUrl(url)).toBe(url);
+    }
+  });
+
+  it('keeps refusing anything outside the allowlist', () => {
+    for (const url of ['/', '/entrar', '/agendar/demo', '/minha-conta/outra', '/reservar/abc', '/meus-agendamentos/../admin', '/reservar/1?x=y']) {
+      expect(service.normalizeReturnUrl(url)).toBeNull();
+    }
+  });
+
   it('consumes and removes the stored return URL', () => {
     service.setReturnUrl('/convite/token');
 
