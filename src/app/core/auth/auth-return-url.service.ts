@@ -3,6 +3,18 @@ import { inject, Injectable, PLATFORM_ID } from '@angular/core';
 
 const AUTH_RETURN_URL_KEY = 'booking.auth.returnUrl';
 
+/**
+ * Internal pages a person may be sent back to after signing in. Anything else (other hosts, protocols, encoded or
+ * query-carrying paths) is refused, so the return URL can never become an open redirect. F-COV-24: before, only
+ * /convite/ was accepted and a person coming from a protected page landed on the legacy demo page instead.
+ */
+const RETURN_URL_ALLOWLIST: readonly RegExp[] = [
+  /^\/convite\/[A-Za-z0-9._~-]{1,512}$/,
+  /^\/(meus-agendamentos|meus-avisos)$/,
+  /^\/minha-conta(\/(dados|autorizacoes|agendamentos|marketing))?$/,
+  /^\/(reservar|agendar-v2)\/\d{1,18}$/
+];
+
 @Injectable({ providedIn: 'root' })
 export class AuthReturnUrlService {
   private readonly platformId = inject(PLATFORM_ID);
@@ -40,13 +52,8 @@ export class AuthReturnUrlService {
 
   private normalize(url: string | null): string | null {
     const normalizedUrl = url?.trim() ?? '';
-    const convitePrefix = '/convite/';
 
     if (!normalizedUrl) {
-      return null;
-    }
-
-    if (!normalizedUrl.startsWith(convitePrefix)) {
       return null;
     }
 
@@ -62,12 +69,6 @@ export class AuthReturnUrlService {
       return null;
     }
 
-    const token = normalizedUrl.slice(convitePrefix.length);
-
-    if (!/^[A-Za-z0-9._~-]{1,512}$/.test(token)) {
-      return null;
-    }
-
-    return normalizedUrl;
+    return RETURN_URL_ALLOWLIST.some((pattern) => pattern.test(normalizedUrl)) ? normalizedUrl : null;
   }
 }

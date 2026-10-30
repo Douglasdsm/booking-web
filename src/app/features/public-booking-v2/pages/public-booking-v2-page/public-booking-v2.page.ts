@@ -1,12 +1,12 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, computed, inject, signal } from '@angular/core';
+import { afterNextRender, Component, computed, ElementRef, inject, Injector, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs/operators';
 
 import { BookingLayoutComponent } from '../../../booking/components/booking-layout/booking-layout.component';
 import { BookingPreview, PublicBookingErrorKind, PublicServiceOffer } from '../../models/public-booking-v2.models';
 import { IdempotencyKeyService } from '../../services/idempotency-key.service';
-import { mapPublicBookingError } from '../../services/public-booking-v2-error-mapper';
+import { mapPublicBookingError, mapPublicEsusProfileError } from '../../services/public-booking-v2-error-mapper';
 import { PublicBookingV2ApiService } from '../../services/public-booking-v2-api.service';
 import { PublicBookingV2Store } from '../../store/public-booking-v2.store';
 
@@ -34,6 +34,8 @@ export class PublicBookingV2Page {
   private readonly route = inject(ActivatedRoute);
   private readonly api = inject(PublicBookingV2ApiService);
   private readonly idempotency = inject(IdempotencyKeyService);
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly injector = inject(Injector);
   private availabilityRequestVersion = 0;
 
   protected readonly store = inject(PublicBookingV2Store);
@@ -172,6 +174,21 @@ export class PublicBookingV2Page {
   protected selectSlot(slot: BookingPreview): void {
     this.store.selectSlot(slot);
     this.idempotency.next();
+    this.revealSelection();
+  }
+
+  /**
+   * F-COV-20 (UX audit P0-02): on a phone the review and the details form render below hundreds of time buttons. After a
+   * choice, bring the review into view and move the focus there, so the person (and a screen reader) continues from it.
+   */
+  private revealSelection(): void {
+    afterNextRender(() => {
+      const review = this.host.nativeElement.querySelector<HTMLElement>('[data-testid="selection-review"]');
+      if (!review) return;
+      const reduceMotion = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+      review.scrollIntoView?.({ block: 'start', behavior: reduceMotion ? 'auto' : 'smooth' });
+      review.focus({ preventScroll: true });
+    }, { injector: this.injector });
   }
 
   protected onNameInput(value: string): void {
@@ -277,7 +294,7 @@ export class PublicBookingV2Page {
             this.loadServiceOffers(esusId);
           }
         },
-        error: (error: HttpErrorResponse) => this.store.setLoadError(mapPublicBookingError(error)),
+        error: (error: HttpErrorResponse) => this.store.setLoadError(mapPublicEsusProfileError(error)),
       });
   }
 

@@ -1,3 +1,4 @@
+import { provideRouter } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
@@ -32,7 +33,7 @@ describe('MeusAgendamentosPage (customer booking lifecycle, V2-MC-02B)', () => {
   let fixture: ComponentFixture<MeusAgendamentosPage>;
   let http: HttpTestingController;
   beforeEach(async () => {
-    await TestBed.configureTestingModule({ imports: [MeusAgendamentosPage], providers: [{ provide: API_CONFIG, useValue: apiConfig }, provideHttpClient(), provideHttpClientTesting()] }).compileComponents();
+    await TestBed.configureTestingModule({ imports: [MeusAgendamentosPage], providers: [provideRouter([]), { provide: API_CONFIG, useValue: apiConfig }, provideHttpClient(), provideHttpClientTesting()] }).compileComponents();
     fixture = TestBed.createComponent(MeusAgendamentosPage);
     http = TestBed.inject(HttpTestingController);
   });
@@ -81,8 +82,8 @@ describe('MeusAgendamentosPage (customer booking lifecycle, V2-MC-02B)', () => {
     expect(history.request.params.get('scope')).toBe('History');
     history.flush(list([summary({ currentState: 'Cancelled' }), summary({ bookingId: 43, currentState: 'Rescheduled' })]));
     fixture.detectChanges();
-    expect(text()).toContain('Cancelled');
-    expect(text()).toContain('Rescheduled');
+    expect(text()).toContain('Cancelado');
+    expect(text()).toContain('Remarcado');
     expect(button('Ver detalhes')).toBeDefined();
   });
 
@@ -90,7 +91,7 @@ describe('MeusAgendamentosPage (customer booking lifecycle, V2-MC-02B)', () => {
     boot([summary()]);
     open('Active');
     const all = text();
-    for (const expected of ['Booking #41', '30 min', 'BookingCreated']) expect(all).toContain(expected);
+    for (const expected of ['Agendamento nº 41', '30 min', 'Agendamento criado']) expect(all).toContain(expected);
     expect(all).toMatch(/R\$\s?80,00/);
     expect(button('Cancelar agendamento')).toBeDefined();
     expect(button('Remarcar')).toBeDefined();
@@ -108,7 +109,7 @@ describe('MeusAgendamentosPage (customer booking lifecycle, V2-MC-02B)', () => {
     expect(cancel.request.body).toEqual({ reason: null });
     cancel.flush({});
     reloadAfterAction([], 'Cancelled');
-    expect(text()).toContain('Cancelled');
+    expect(text()).toContain('Cancelado');
     expect(button('Cancelar agendamento')).toBeUndefined();
     expect(button('Remarcar')).toBeUndefined();
   });

@@ -32,6 +32,7 @@ export class LoginPage {
   protected readonly returnUrl = signal<string | null>(
     resolveInitialReturnUrl(this.route.snapshot.queryParamMap.get('returnUrl'), this.returnUrlService),
   );
+  protected readonly continuesInvite = computed(() => this.returnUrl()?.startsWith('/convite/') ?? false);
   protected readonly registerCommands = computed(() => ['/cadastrar']);
   protected readonly registerQueryParams = computed(() =>
     this.returnUrl() ? { returnUrl: this.returnUrl() } : null,
@@ -80,8 +81,8 @@ export class LoginPage {
         error: (error) => {
           this.error.set(
             error?.status === 401
-              ? 'Usuario ou senha invalidos.'
-              : extractApiErrorMessage(error, 'Nao foi possivel entrar. Tente novamente.'),
+              ? 'Usuário ou senha inválidos.'
+              : extractApiErrorMessage(error, 'Não foi possível entrar. Tente novamente.'),
           );
         },
       });

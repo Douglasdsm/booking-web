@@ -1,7 +1,8 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { AuthReturnUrlService } from '../../../core/auth/auth-return-url.service';
 
-export const PUBLIC_AUTH_FALLBACK_ROUTE = '/agendar/demo';
+/** Where a signed-in person goes when there is no page to return to (was the legacy /agendar/demo, which shows an error — F-COV-24). */
+export const PUBLIC_AUTH_FALLBACK_ROUTE = '/minha-conta';
 
 export function resolveInitialReturnUrl(
   queryReturnUrl: string | null,

@@ -35,6 +35,8 @@ export const routes: Routes = [
   },
   {
     path: 'minha-conta',
+    // F-COV-28: the account area requires a session (it opened, empty, for anyone); the guard sends to /entrar with returnUrl
+    canActivate: [sessionRequiredGuard],
     loadChildren: () =>
       import('./features/minha-conta/minha-conta.routes').then((m) => m.MINHA_CONTA_ROUTES),
   },
@@ -84,8 +86,9 @@ export const routes: Routes = [
       ),
   },
   {
+    // F-COV-19 (UX audit P1-01): "/" sent visitors to the legacy /agendar/demo, which answers 404
     path: '',
     pathMatch: 'full',
-    redirectTo: 'agendar/demo',
+    redirectTo: 'minha-conta',
   },
 ];
