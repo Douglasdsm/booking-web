@@ -1,6 +1,7 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { finalize, Observable } from 'rxjs';
 
+import { AccountNavComponent } from '../../layout/account-nav.component';
 import { bookingEventLabel, bookingStateLabel } from '../../core/format/booking-display';
 import { extractApiErrorMessage } from '../auth-publica/utils/public-auth-utils';
 import { CandidatoRemarcacao, CicloDeVida, DetalheAgendamento, ListaAgendamentos, MeusAgendamentosService, ResumoAgendamento } from './meus-agendamentos.service';
@@ -12,10 +13,11 @@ type Panel = 'cancel' | 'reschedule' | null;
 
 @Component({
   selector: 'app-meus-agendamentos-page',
+  imports: [AccountNavComponent],
   template: `
     <main class="booking-app">
       <section class="booking-panel">
-        <header class="booking-header"><div class="booking-brand"><p class="booking-brand__eyebrow">Conta</p><h1>Meus agendamentos</h1></div></header>
+        <header class="booking-header"><div class="booking-brand"><p class="booking-brand__eyebrow">Conta</p><h1>Meus agendamentos</h1></div><app-account-nav /></header>
         <div class="booking-content">
           @if (error()) { <p role="alert" tabindex="-1">{{ error() }}</p> }
           @if (success()) { <p role="status">{{ success() }}</p> }

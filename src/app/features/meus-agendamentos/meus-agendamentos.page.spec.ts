@@ -1,3 +1,4 @@
+import { provideRouter } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
@@ -32,7 +33,7 @@ describe('MeusAgendamentosPage (customer booking lifecycle, V2-MC-02B)', () => {
   let fixture: ComponentFixture<MeusAgendamentosPage>;
   let http: HttpTestingController;
   beforeEach(async () => {
-    await TestBed.configureTestingModule({ imports: [MeusAgendamentosPage], providers: [{ provide: API_CONFIG, useValue: apiConfig }, provideHttpClient(), provideHttpClientTesting()] }).compileComponents();
+    await TestBed.configureTestingModule({ imports: [MeusAgendamentosPage], providers: [provideRouter([]), { provide: API_CONFIG, useValue: apiConfig }, provideHttpClient(), provideHttpClientTesting()] }).compileComponents();
     fixture = TestBed.createComponent(MeusAgendamentosPage);
     http = TestBed.inject(HttpTestingController);
   });

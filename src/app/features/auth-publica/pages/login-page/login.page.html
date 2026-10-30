@@ -2,7 +2,9 @@
   <section class="auth-card">
     <p class="eyebrow">Conta</p>
     <h1>Entrar</h1>
-    <p class="subtitle">Use sua conta permanente para continuar o convite.</p>
+    <p class="subtitle">
+      {{ continuesInvite() ? 'Use sua conta permanente para continuar o convite.' : 'Entre para ver seus agendamentos e reservas.' }}
+    </p>
 
     @if (error()) {
       <div class="error-message" data-testid="login-error">{{ error() }}</div>

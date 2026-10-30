@@ -105,7 +105,23 @@ describe('LoginPage', () => {
       .flush({}, { status: 401, statusText: 'Unauthorized' });
     fixture.detectChanges();
 
-    expect(textContent()).toContain('Usuario ou senha invalidos.');
+    expect(textContent()).toContain('Usuário ou senha inválidos.');
+  });
+
+  // UX-BOOKING-WEB P2-03: the subtitle spoke of an invite even when the visitor came from a protected page
+  it('mentions the invite only when the login continues an invite', async () => {
+    await setup('/convite/invite-token');
+    fixture.detectChanges();
+
+    expect(textContent()).toContain('Use sua conta permanente para continuar o convite.');
+  });
+
+  it('describes the account area when the login does not continue an invite', async () => {
+    await setup('/meus-agendamentos');
+    fixture.detectChanges();
+
+    expect(textContent()).toContain('Entre para ver seus agendamentos e reservas.');
+    expect(textContent()).not.toContain('convite');
   });
 
   it('uses safe public fallback after direct access without returnUrl', async () => {

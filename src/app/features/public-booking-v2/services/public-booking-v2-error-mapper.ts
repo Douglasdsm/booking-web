@@ -20,6 +20,16 @@ export function mapPublicBookingError(error: HttpErrorResponse): PublicBookingEr
   return { kind, message: userFacingMessage(kind, serverMessage) };
 }
 
+/**
+ * Loading the company profile itself: a 404 there means the link points to no company (UX-BOOKING-WEB P2-01), not that a
+ * chosen service or time went away; every other failure keeps the general mapping.
+ */
+export function mapPublicEsusProfileError(error: HttpErrorResponse): PublicBookingError {
+  return error.status === 404
+    ? { kind: 'InvalidService', message: 'Não encontramos esta página de agendamento. Confira o link recebido.' }
+    : mapPublicBookingError(error);
+}
+
 /** V2-MC-06 / F-12: only the backend's structured 409 CONDITIONS_CHANGED is trusted - never inferred from message text. */
 function extractConditions(error: HttpErrorResponse): ConditionsChangedDetails | null {
   if (error.status !== 409 || typeof error.error !== 'object' || error.error === null) return null;

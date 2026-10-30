@@ -6,7 +6,7 @@ import { finalize } from 'rxjs/operators';
 import { BookingLayoutComponent } from '../../../booking/components/booking-layout/booking-layout.component';
 import { BookingPreview, PublicBookingErrorKind, PublicServiceOffer } from '../../models/public-booking-v2.models';
 import { IdempotencyKeyService } from '../../services/idempotency-key.service';
-import { mapPublicBookingError } from '../../services/public-booking-v2-error-mapper';
+import { mapPublicBookingError, mapPublicEsusProfileError } from '../../services/public-booking-v2-error-mapper';
 import { PublicBookingV2ApiService } from '../../services/public-booking-v2-api.service';
 import { PublicBookingV2Store } from '../../store/public-booking-v2.store';
 
@@ -294,7 +294,7 @@ export class PublicBookingV2Page {
             this.loadServiceOffers(esusId);
           }
         },
-        error: (error: HttpErrorResponse) => this.store.setLoadError(mapPublicBookingError(error)),
+        error: (error: HttpErrorResponse) => this.store.setLoadError(mapPublicEsusProfileError(error)),
       });
   }
 

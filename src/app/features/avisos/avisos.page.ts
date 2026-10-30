@@ -2,16 +2,17 @@ import { DatePipe } from '@angular/common';
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { finalize, forkJoin, Observable } from 'rxjs';
 
+import { AccountNavComponent } from '../../layout/account-nav.component';
 import { extractApiErrorMessage } from '../auth-publica/utils/public-auth-utils';
 import { AgendamentoResumo, AvisosService, EntradaListaEspera, Oportunidade, Reconfirmacao } from './avisos.service';
 
 @Component({
   selector: 'app-avisos-page',
-  imports: [DatePipe],
+  imports: [DatePipe, AccountNavComponent],
   template: `
     <main class="booking-app">
       <section class="booking-panel">
-        <header class="booking-header"><div class="booking-brand"><p class="booking-brand__eyebrow">Conta</p><h1>Meus avisos</h1></div></header>
+        <header class="booking-header"><div class="booking-brand"><p class="booking-brand__eyebrow">Conta</p><h1>Meus avisos</h1></div><app-account-nav /></header>
         <div class="booking-content">
           <p>Respostas pendentes e lista de espera dos seus agendamentos. O estado exibido vem sempre do servidor.</p>
           @if (error()) { <p role="alert" tabindex="-1">{{ error() }}</p> }

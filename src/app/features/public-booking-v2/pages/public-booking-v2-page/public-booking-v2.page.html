@@ -1,4 +1,4 @@
-<app-booking-layout>
+<app-booking-layout [companyName]="store.esusProfile()?.receivingCompanyName ?? null">
   <div class="booking-step" aria-live="polite">
     @if (store.loadError() && !store.esusProfile()) {
       <!-- Esus resolution / initial load failed before we even know if booking is enabled. -->
