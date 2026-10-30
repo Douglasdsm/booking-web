@@ -86,8 +86,9 @@ export const routes: Routes = [
       ),
   },
   {
+    // F-COV-19 (UX audit P1-01): "/" sent visitors to the legacy /agendar/demo, which answers 404
     path: '',
     pathMatch: 'full',
-    redirectTo: 'agendar/demo',
+    redirectTo: 'minha-conta',
   },
 ];

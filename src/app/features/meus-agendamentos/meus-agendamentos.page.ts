@@ -1,6 +1,7 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { finalize, Observable } from 'rxjs';
 
+import { bookingEventLabel, bookingStateLabel } from '../../core/format/booking-display';
 import { extractApiErrorMessage } from '../auth-publica/utils/public-auth-utils';
 import { CandidatoRemarcacao, CicloDeVida, DetalheAgendamento, ListaAgendamentos, MeusAgendamentosService, ResumoAgendamento } from './meus-agendamentos.service';
 
@@ -26,7 +27,7 @@ type Panel = 'cancel' | 'reschedule' | null;
           @else if (list().items.length === 0) { <p>Nenhum agendamento nesta lista.</p> }
           @for (item of list().items; track item.bookingId) {
             <article data-testid="booking-card">
-              <strong>{{ item.serviceLabel }} — {{ item.currentState }}</strong>
+              <strong>{{ item.serviceLabel }} — {{ stateLabel(item.currentState) }}</strong>
               <p>{{ formatDay(item) }} {{ formatTime(item, item.startUtc) }} – {{ formatTime(item, item.endUtc) }}</p>
               @if (item.prestadorName) { <p>Profissional: {{ item.prestadorName }}</p> }
               @if (item.executionLocationName) { <p>Local: {{ item.executionLocationName }}</p> }
@@ -43,8 +44,8 @@ type Panel = 'cancel' | 'reschedule' | null;
 
           @if (selected(); as current) {
             <section class="booking-summary-card" data-testid="booking-detail" aria-label="Detalhe do agendamento">
-              <h2>Booking #{{ current.bookingId }}</h2>
-              @if (lifecycle(); as life) { <p data-testid="detail-state">{{ life.currentState }}</p> }
+              <h2>Agendamento nº {{ current.bookingId }}</h2>
+              @if (lifecycle(); as life) { <p data-testid="detail-state">{{ stateLabel(life.currentState) }}</p> }
               @if (detail(); as d) {
                 <div class="booking-row"><span>Horário</span><strong>{{ formatDay(current) }} {{ formatTime(current, d.startUtc) }} – {{ formatTime(current, d.endUtc) }}</strong></div>
                 <div class="booking-row"><span>Duração</span><strong>{{ d.effectiveDurationMinutes }} min</strong></div>
@@ -54,7 +55,7 @@ type Panel = 'cancel' | 'reschedule' | null;
               }
               @if (lifecycle()?.timeline?.length) {
                 <h3>Histórico</h3>
-                <ul>@for (event of lifecycle()!.timeline; track event.occurredAtUtc + event.eventType) { <li>{{ event.eventType }} — {{ formatDay(current) === '' ? '' : event.occurredAtUtc.slice(0, 10) }} {{ event.detail }}</li> }</ul>
+                <ul>@for (event of lifecycle()!.timeline; track event.occurredAtUtc + event.eventType) { <li>{{ eventLabel(event.eventType) }} — {{ formatDayOf(current, event.occurredAtUtc) }} {{ formatTime(current, event.occurredAtUtc) }}</li> }</ul>
               }
               @if (isActionable()) {
                 <button type="button" class="booking-button" [disabled]="busy()" (click)="openPanel('cancel')">Cancelar agendamento</button>
@@ -180,6 +181,8 @@ export class MeusAgendamentosPage implements OnInit {
   isChosen(slot: CandidatoRemarcacao): boolean { const c = this.chosen(); return !!c && this.slotKey(c) === this.slotKey(slot); }
   currency(value: number, code: string): string { return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: code || 'BRL' }).format(value); }
   formatTime(item: ResumoAgendamento, iso: string): string { return new Intl.DateTimeFormat('pt-BR', { timeZone: this.tz(item), hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(new Date(iso)); }
+  stateLabel(state: string | null | undefined): string { return bookingStateLabel(state); }
+  eventLabel(eventType: string | null | undefined): string { return bookingEventLabel(eventType); }
   formatDay(item: ResumoAgendamento): string { return this.formatDayOf(item, item.startUtc); }
   formatDayOf(item: ResumoAgendamento, iso: string): string { return new Intl.DateTimeFormat('pt-BR', { timeZone: this.tz(item), day: '2-digit', month: '2-digit', year: 'numeric' }).format(new Date(iso)); }
   private tz(item: ResumoAgendamento): string { return this.timeZones()[item.executionEsusId] ?? 'UTC'; }

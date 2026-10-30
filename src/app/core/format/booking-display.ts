@@ -17,6 +17,31 @@ export function bookingStateLabel(state: string | null | undefined): string {
   return STATE_LABELS[state] ?? state;
 }
 
+// BookingLifecycleEventType (API, closed set) — the timeline printed "HoldRequested", "BookingCreated"
+const EVENT_LABELS: Record<string, string> = {
+  BookingCreated: 'Agendamento criado',
+  HoldRequested: 'Horário reservado',
+  GuaranteeSatisfied: 'Garantia confirmada',
+  ReconfirmationRequested: 'Confirmação solicitada',
+  ReconfirmationResponded: 'Confirmação respondida',
+  WaitlistEntryCreated: 'Entrada na lista de espera',
+  OpportunityOffered: 'Vaga oferecida',
+  Cancelled: 'Cancelado',
+  NoShow: 'Não compareceu',
+  RescheduledTo: 'Remarcado para outro horário',
+  RescheduledFrom: 'Remarcação de outro horário',
+  ReplacedBy: 'Substituído por outro agendamento',
+  ReplacementOf: 'Substitui outro agendamento',
+  ServiceOrderOpened: 'Atendimento iniciado',
+  ServiceOrderClosed: 'Atendimento encerrado',
+  ServiceOrderCompleted: 'Atendimento concluído',
+};
+
+export function bookingEventLabel(eventType: string | null | undefined): string {
+  if (!eventType) return '';
+  return EVENT_LABELS[eventType] ?? eventType;
+}
+
 /** "23/10/2026 às 10:00" — pt-BR, 24 h, in `timeZone` (IANA) or the browser zone when it is unknown. */
 export function formatBookingDateTime(iso: string, timeZone?: string | null): string {
   const date = new Date(iso);
